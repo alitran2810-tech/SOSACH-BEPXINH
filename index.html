@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sổ sách kế toán kho</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --fg: #0f172a;
+      --mut: #64748b;
+      --line: #e2e8f0;
+      --hd: #1e293b;
+      --hf: #ffffff;
+      --ac: #1d4ed8;
+      --ok: #dcfce7;
+      --ok-fg: #166534;
+      --er: #fee2e2;
+      --er-fg: #991b1b;
+      --warn: #fef3c7;
+      --warn-fg: #92400e;
+      --card: #f1f5f9;
+      --sel: #eff6ff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme=light]) {
+        --bg: #020617;
+        --surface: #0f172a;
+        --fg: #f1f5f9;
+        --mut: #94a3b8;
+        --line: #1e293b;
+        --hd: #1e293b;
+        --hf: #f8fafc;
+        --ac: #3b82f6;
+        --ok: #14532d;
+        --ok-fg: #bbf7d0;
+        --er: #7f1d1d;
+        --er-fg: #fecaca;
+        --warn: #78350f;
+        --warn-fg: #fde68a;
+        --card: #1e293b;
+        --sel: #172554;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--fg);
+      font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    header {
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+    .hdr-l, .hdr-r { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    h1 { font-size: 16px; margin: 0 8px 0 0; color: var(--ac); font-weight: 700; white-space: nowrap; }
+    button, select, input {
+      font: inherit;
+      color: var(--fg);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 5px 9px;
+    }
+    button {
+      cursor: pointer;
+      background: var(--ac);
+      color: #fff;
+      border-color: var(--ac);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    button:hover { opacity: 0.92; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    button.s { background: var(--surface); color: var(--fg); border-color: var(--line); font-weight: 500; }
+    button.d { background: #dc2626; border-color: #dc2626; color: #fff; }
+    input[type=number] { width: 68px; }
+    nav {
+      display: flex;
+      gap: 4px;
+      padding: 6px 14px 0;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+    nav button {
+      background: transparent;
+      color: var(--mut);
+      border: 0;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      padding: 7px 12px;
+      font-weight: 600;
+    }
+    nav button.on { color: var(--ac); border-bottom-color: var(--ac); }
+    main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 14px;
+      gap: 8px;
+    }
+    .bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
+    .w {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+    table { border-collapse: collapse; width: 100%; white-space: nowrap; font-size: 12px; }
+    thead { position: sticky; top: 0; z-index: 2; }
+    tfoot { position: sticky; bottom: 0; z-index: 2; }
+    th {
+      background: var(--hd);
+      color: var(--hf);
+      padding: 7px 8px;
+      font-weight: 600;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+    th.n { text-align: right; }
+    td { padding: 5px 8px; border-top: 1px solid var(--line); }
+    td.n { text-align: right; font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    tr:hover td { background: rgba(148, 163, 184, 0.08); }
+    tr.sel td { background: var(--sel) !important; }
+    tr.er td { background: var(--er); color: var(--er-fg); }
+    tr.tt td, tfoot td { font-weight: 700; background: var(--card); color: var(--fg); }
+    tfoot td { border-top: 1px solid var(--line); }
+    .m { color: var(--mut); font-size: 12px; }
+    .st {
+      padding: 7px 10px;
+      border-radius: 6px;
+      background: var(--ok);
+      color: var(--ok-fg);
+      font-size: 12px;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .st.er { background: var(--er); color: var(--er-fg); }
+    .st.wn { background: var(--warn); color: var(--warn-fg); }
+    .fm { display: grid; grid-template-columns: 210px minmax(0, 440px); gap: 8px; align-items: center; }
+    .sg { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; margin-top: 16px; gap: 12px; }
+    .sc-wrap { flex: 1; min-height: 0; overflow: auto; }
+    .sc {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px 22px;
+      margin-bottom: 14px;
+    }
+    .sc table { white-space: normal; }
+    .sc th, .sc td { border: 1px solid var(--line); padding: 4px 6px; }
+    .sc th { text-align: center; }
+    .pvs, .co { display: none; }
+    body.pv .w, body.pv .bar, body.pv .st, body.pv h3 { display: none !important; }
+    body.pv .pvs { display: block; }
+    .pvs table { white-space: normal; }
+    .pvs th, .pvs td { border: 1px solid #cbd5e1; }
+    .modal-bg {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(15, 23, 42, 0.55);
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal {
+      width: 100%; max-width: 500px;
+      background: var(--surface); color: var(--fg);
+      border: 1px solid var(--line); border-radius: 10px;
+      padding: 20px; box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25);
+    }
+    .modal h3 { margin: 0 0 8px; font-size: 15px; }
+    .modal-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+    @media print {
+      html, body { height: auto !important; overflow: visible !important; background: #fff !important; color: #000 !important; }
+      header, nav, .bar, .noprint, .st, .modal-bg { display: none !important; }
+      main { padding: 0 !important; display: block !important; }
+      .w, .sc-wrap { overflow: visible !important; max-height: none !important; border: 0 !important; }
+      .sc { border: 0 !important; padding: 0 !important; margin: 0 !important; }
+      thead, tfoot { position: static !important; }
+      th { background: #e2e8f0 !important; color: #000 !important; border: 1px solid #94a3b8 !important; }
+      td { border: 1px solid #cbd5e1 !important; color: #000 !important; }
+      .co { display: block; margin-bottom: 6px; }
+      .pb { page-break-after: always; break-after: page; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hdr-l">
+      <h1>SỔ SÁCH KẾ TOÁN KHO</h1>
+      <label>Năm <input id="yr" type="number" value="2026" style="width:78px"></label>
+      <label>Tính giá đến tháng <input id="up" type="number" min="0" max="12" value="12"></label>
+    </div>
+    <div class="hdr-r">
+      <button class="s" id="bsample" style="display:none">Nạp dữ liệu mẫu</button>
+      <button class="s" id="bexp">⬇ Sao lưu JSON</button>
+      <label style="display:inline-block">
+        <input id="fimp" type="file" accept=".json" style="display:none">
+        <button class="s" type="button" onclick="this.previousElementSibling.click()">⬆ Khôi phục JSON</button>
+      </label>
+      <button class="s" id="bclear">🗑 Xóa dữ liệu</button>
+      <span id="sy" class="m"></span>
+    </div>
+  </header>
+  <nav id="nv"></nav>
+  <main id="mn"></main>
+  <div id="mdl"></div>
+
+  <script>
+    const $ = s => document.querySelector(s);
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const fmt = (v, d = 0) => v === "" || v == null || isNaN(v) ? "" : Number(v).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+    const dr = s => s ? s.split("-").reverse().join("/") : "";
+
+    const STORE_KEY = "so_ke_toan_kho_html_v1";
+    const P = [], Ln = [], NKX = [], KH = [], NCC = [];
+    const CFG = { ten: "", dc: "", mst: "", tk: "156", kho: "Kho chính", ghi: "", kt: "", dd: "" };
+
+    let scMa = "", scAll = false, tab = "tk";
+    let kt = { t: "Tháng", k: 1 };
+    let s10 = { t: "Tháng", k: 1 };
+    let ctPer = { t: "Tất cả", k: 1, y: 2026 };
+    let ctQ = "";
+    let msg = "", merr = 0;
+
+    const TABS = [
+      ["nk", "Nhật ký chung"],
+      ["ct", "Chi tiết xuất nhập"],
+      ["tk", "Tổng hợp tồn kho"],
+      ["dm", "Danh mục hàng hóa"],
+      ["kh", "Danh mục khách hàng"],
+      ["ncc", "Danh mục nhà cung cấp"],
+      ["cf", "Thông tin doanh nghiệp"]
+    ];
+
+    function saveLocal() {
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify({
+          yr: +$("#yr").value || 2026,
+          up: +$("#up").value || 0,
+          P, Ln, NKX, KH, NCC, CFG
+        }));
+        $("#sy").textContent = "Đã tự lưu trên trình duyệt";
+      } catch (e) {}
+    }
+
+    function loadLocal() {
+      try {
+        const raw = localStorage.getItem(STORE_KEY);
+        if (!raw) return;
+        const d = JSON.parse(raw);
+        if (d.yr) $("#yr").value = d.yr;
+        if (d.up != null) $("#up").value = d.up;
+        if (Array.isArray(d.P)) P.push(...d.P);
+        if (Array.isArray(d.Ln)) Ln.push(...d.Ln);
+        if (Array.isArray(d.NKX)) NKX.push(...d.NKX);
+        if (Array.isArray(d.KH)) KH.push(...d.KH);
+        if (Array.isArray(d.NCC)) NCC.push(...d.NCC);
+        if (d.CFG) Object.assign(CFG, d.CFG);
+        ctPer.y = +$("#yr").value || 2026;
+      } catch (e) {}
+    }
+
+    const st = (t, e = 0) => { msg = t; merr = e; };
+    const norm = s => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "d").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    const mk = {
+      dm: {
+        ma: ["mahang", "ma"],
+        ten: ["tenhang", "tenhanghoa", "ten"],
+        dvt: ["dvt", "donvitinh"],
+        sl: ["slton", "tondausl", "tondaunamsoluong", "tondaunamsl", "tonkhodaukysoluong", "tondaukysoluong", "soluong", "sl"],
+        gt: ["gtton", "tondaugt", "tondaunamgiatri", "tondaunamgt", "tonkhodaukygiatri", "tondaukygiatri", "giatri", "gt"],
+        dg: ["tonkhodaukydongia", "tondaukydongia"]
+      },
+      ct: {
+        ph: ["maphieu"], ngay: ["ngay"], hd: ["sohoadon", "sohd"],
+        kh: ["makhmancc", "makh", "mancc", "makhachhang"],
+        no: ["tkno", "no"], co: ["tkco", "co"], nd: ["noidung", "noidungphieu"],
+        ma: ["mahang"], sn: ["nhapsoluong", "slnhap", "nhapsl"],
+        gn: ["nhapdongia", "dgnhap", "dongianhap"],
+        sx: ["xuatsoluong", "slxuat", "xuatsl"],
+        gi: ["gandongiaxuat", "gangiaxuat", "giaxuat", "xuatdongia", "dgxuat"]
+      },
+      nk: {
+        ph: ["maphieu"], ngay: ["ngay"], hd: ["sohoadon", "sohd"], nd: ["noidung"],
+        no: ["tkno", "taikhoanno"], co: ["tkco", "taikhoanco"],
+        tien: ["sotien", "giatri"], kh: ["makhmancc", "makh", "mancc"]
+      },
+      kh: {
+        ma: ["makh", "ma", "makhachhang"],
+        ten: ["thongtinkhachhang", "thongtin", "tenkhachhang", "ten"],
+        mst: ["mst", "masothue"],
+        dau: ["dauky", "sodudauky", "dudauky"]
+      },
+      ncc: {
+        ma: ["mancc", "ma", "manhacungcap"],
+        ten: ["thongtinnhacungcap", "thongtinkhachhang", "thongtin", "tennhacungcap", "ten"],
+        mst: ["mst", "masothue"],
+        dau: ["dauky", "sodudauky", "dudauky"]
+      }
+    };
+
+    function toDate(v) {
+      if (v instanceof Date && !isNaN(v.getTime())) return new Date(v.getTime() - v.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+      if (typeof v === "number") return new Date(Math.round((v - 25569) * 864e5)).toISOString().slice(0, 10);
+      const m = String(v || "").trim().match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$/);
+      if (m) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+      return String(v || "").slice(0, 10);
+    }
+
+    function mqyInfo(ngay) {
+      if (!ngay || ngay.length < 7) return null;
+      const y = +ngay.slice(0, 4), m = +ngay.slice(5, 7);
+      if (!y || !m || m < 1 || m > 12) return null;
+      const q = Math.ceil(m / 3);
+      return { y, m, q, lbl: `T${String(m).padStart(2, "0")} · Q${q}/${y}` };
+    }
+
+    function showDuplicateModal(incoming, overlapKeys, rowCount, cols) {
+      const labels = overlapKeys.map(ym => {
+        const [y, m] = ym.split("-");
+        return `Tháng ${m}/${y} (Quý ${Math.ceil(+m / 3)})`;
+      });
+      const overlapSet = new Set(overlapKeys);
+      const hasOther = Ln.some(l => l.ngay && l.ngay.length >= 7 && !overlapSet.has(l.ngay.slice(0, 7)));
+
+      $("#mdl").innerHTML = `
+        <div class="modal-bg">
+          <div class="modal">
+            <h3>Xác nhận import dữ liệu trùng kỳ</h3>
+            <p style="margin:6px 0 10px"><b>Kỳ xuất nhập kho này đã có dữ liệu. Bạn muốn import thêm vào dữ liệu đã có sẵn hay import đè xóa hoàn toàn dữ liệu cũ?</b></p>
+            <div class="st wn" style="display:block">Kỳ trùng: ${esc(labels.join(", "))} (Hiện có ${Ln.length} dòng · File mới ${incoming.length} dòng)</div>
+            <div class="modal-actions">
+              <button class="s" id="m-cancel">Hủy</button>
+              ${hasOther ? `<button class="s" id="m-rep">Chỉ ghi đè kỳ trùng</button>` : ""}
+              <button class="d" id="m-over">Ghi đè (Xóa dữ liệu cũ)</button>
+              <button id="m-app">Ghi thêm</button>
+            </div>
+          </div>
+        </div>`;
+
+      const close = () => { $("#mdl").innerHTML = ""; };
+      $("#m-cancel").onclick = close;
+      $("#m-app").onclick = () => {
+        Ln.push(...incoming);
+        if (Ln[0] && Ln[0].ngay) $("#yr").value = Ln[0].ngay.slice(0, 4);
+        st(`Đã ghi thêm ${incoming.length} dòng vào dữ liệu sẵn có. Cột: ${cols}`);
+        close(); saveLocal(); render();
+      };
+      $("#m-over").onclick = () => {
+        Ln.length = 0; Ln.push(...incoming);
+        if (Ln[0] && Ln[0].ngay) $("#yr").value = Ln[0].ngay.slice(0, 4);
+        st(`Đã ghi đè (xóa dữ liệu cũ), giữ ${incoming.length} dòng mới. Cột: ${cols}`);
+        close(); saveLocal(); render();
+      };
+      if (hasOther) {
+        $("#m-rep").onclick = () => {
+          const kept = Ln.filter(l => !l.ngay || l.ngay.length < 7 || !overlapSet.has(l.ngay.slice(0, 7)));
+          Ln.length = 0; Ln.push(...kept, ...incoming);
+          st(`Đã thay thế riêng kỳ trùng bằng ${incoming.length} dòng mới. Cột: ${cols}`);
+          close(); saveLocal(); render();
+        };
+      }
+    }
+
+    function importFile(f, kind) {
+      const r = new FileReader();
+      r.onload = e => {
+        try {
+          const wb = XLSX.read(e.target.result, { type: "array", cellDates: true });
+          const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
+          const spec = mk[kind === "tk" ? "dm" : kind];
+          const map = {};
+          if (rows.length) {
+            Object.keys(rows[0]).forEach(h => {
+              const n = norm(h);
+              for (const k in spec) if (spec[k].includes(n) && !(k in map)) map[k] = h;
+            });
+          }
+          const g = (r, k) => map[k] ? r[map[k]] : "";
+          const num = v => v === "" ? null : Number(String(v).replace(/,/g, ""));
+          const cols = Object.keys(map).join(", ") || "không có - kiểm tra tiêu đề cột";
+
+          if (kind === "dm" || kind === "tk") {
+            P.length = 0;
+            rows.forEach(r => {
+              const ma = String(g(r, "ma")).trim();
+              if (ma) P.push({
+                ma, ten: String(g(r, "ten") ?? ""), dvt: String(g(r, "dvt") ?? ""),
+                sl: num(g(r, "sl")) || 0,
+                gt: num(g(r, "gt")) ?? (num(g(r, "sl")) || 0) * (num(g(r, "dg")) || 0)
+              });
+            });
+          } else if (kind === "nk") {
+            NKX.length = 0;
+            rows.forEach(r => {
+              const ph = String(g(r, "ph")).trim(), t = num(g(r, "tien"));
+              if (ph || t) NKX.push({
+                ngay: toDate(g(r, "ngay")), ph, hd: String(g(r, "hd")),
+                nd: String(g(r, "nd")), no: String(g(r, "no")), co: String(g(r, "co")),
+                tien: t || 0, kh: String(g(r, "kh"))
+              });
+            });
+          } else if (kind === "kh" || kind === "ncc") {
+            const A = kind === "kh" ? KH : NCC;
+            A.length = 0;
+            rows.forEach(r => {
+              const ma = String(g(r, "ma")).trim();
+              if (ma) A.push({ ma, ten: String(g(r, "ten")), mst: String(g(r, "mst")), dau: num(g(r, "dau")) || 0 });
+            });
+          } else {
+            const incoming = [];
+            rows.forEach(r => {
+              const ma = String(g(r, "ma")).trim(), ph = String(g(r, "ph")).trim();
+              if (ma || ph) incoming.push({
+                ph, ngay: toDate(g(r, "ngay")), hd: String(g(r, "hd")), kh: String(g(r, "kh")),
+                no: String(g(r, "no")), co: String(g(r, "co")), nd: String(g(r, "nd")),
+                ma, sn: num(g(r, "sn")), gn: num(g(r, "gn")), sx: num(g(r, "sx")), gi: num(g(r, "gi"))
+              });
+            });
+            if (Ln.length > 0) {
+              const existSet = new Set(Ln.map(l => l.ngay ? l.ngay.slice(0, 7) : "").filter(Boolean));
+              const overlap = [...new Set(incoming.map(l => l.ngay ? l.ngay.slice(0, 7) : "").filter(ym => ym && existSet.has(ym)))].sort();
+              if (overlap.length > 0) {
+                showDuplicateModal(incoming, overlap, rows.length, cols);
+                return;
+              }
+              Ln.push(...incoming);
+              if (incoming[0] && incoming[0].ngay) { $("#yr").value = incoming[0].ngay.slice(0, 4); ctPer.y = +$("#yr").value; }
+              st(`Đã ghi thêm ${incoming.length} dòng kỳ mới. Cột nhận diện: ${cols}`);
+              saveLocal(); render(); return;
+            }
+            Ln.length = 0; Ln.push(...incoming);
+            if (Ln[0] && Ln[0].ngay) { $("#yr").value = Ln[0].ngay.slice(0, 4); ctPer.y = +$("#yr").value; }
+          }
+          st(`Đã đọc ${rows.length} dòng. Cột nhận diện: ${cols}`);
+          saveLocal(); render();
+        } catch (x) {
+          st("Lỗi đọc file: " + x.message, 1); render();
+        }
+      };
+      r.readAsArrayBuffer(f);
+    }
+
+    function calc() {
+      const Y = +$("#yr").value, U = +$("#up").value;
+      const pm = {}; P.forEach(p => pm[p.ma] = p);
+      const M = {}; P.forEach(p => M[p.ma] = {});
+      const first = {}, errs = new Map();
+      Ln.forEach(l => {
+        l._m = l.ngay && +l.ngay.slice(0, 4) === Y ? +l.ngay.slice(5, 7) : 0;
+        l.gtn = l.sn != null ? Math.round(l.sn * (l.gn || 0)) : null;
+        l.px = null;
+        let e = "";
+        if (!l.ph) e = "Thiếu mã phiếu";
+        else if (!l.ngay) e = "Thiếu ngày";
+        else if (first[l.ph] && first[l.ph].ngay !== l.ngay) e = `Mã phiếu bị trùng, đã có ở ngày ${dr(first[l.ph].ngay)} - vui lòng kiểm tra lại`;
+        else if (!pm[l.ma]) e = "Mã hàng chưa có trong danh mục";
+        if (l.ph && !first[l.ph]) first[l.ph] = l;
+        if (e) errs.set(l, e);
+      });
+      P.forEach(p => {
+        let s = p.sl, g = p.gt;
+        for (let m = 1; m <= U; m++) {
+          const ls = Ln.filter(l => l.ma === p.ma && l._m === m);
+          let nS = 0, nG = 0, xS = 0, xI = 0, xIS = 0;
+          ls.forEach(l => {
+            nS += l.sn || 0; nG += l.gtn || 0; xS += l.sx || 0;
+            if (l.sx && l.gi != null && l.gi !== "") { xI += l.sx * l.gi; xIS += l.sx; }
+          });
+          const pr = s + nS ? (g + nG) / (s + nS) : 0;
+          const xG = (xS - xIS) * pr + xI;
+          ls.forEach(l => { if (l.sx) l.px = l.gi != null && l.gi !== "" ? l.gi : pr; });
+          M[p.ma][m] = { dS: s, dG: g, nS, nG, xS, xG, pr };
+          s = s + nS - xS;
+          g = Math.round((g + nG - xG) * 100) / 100;
+        }
+      });
+      return { M, errs, Y, U };
+    }
+
+    function rangeOf(per) {
+      return per.t === "Năm" ? [1, 12] : per.t === "Quý" ? [3 * per.k - 2, 3 * per.k] : [per.k, per.k];
+    }
+
+    const th = (a, numIdx = []) => "<tr>" + a.map((x, i) => `<th class="${numIdx.includes(i) ? "n" : ""}">${x}</th>`).join("") + "</tr>";
+    const upl = k => `<label class="noprint"><input type="file" accept=".xlsx,.xls,.csv" data-i="${k}" style="display:none"><button type="button" onclick="this.previousElementSibling.click()">📂 Import Excel/CSV</button></label>`;
+    const coHead = () => `<div class="co"><b>${esc(CFG.ten)}</b><br>${esc(CFG.dc)}${CFG.mst ? " - MST: " + esc(CFG.mst) : ""}</div>`;
+
+    function nkG() {
+      const C = calc(), g = new Map();
+      Ln.forEach(l => {
+        if (!l.ph || l._m < 1 || l._m > C.U) return;
+        const k = l.ph + "|" + l.kh;
+        if (!g.has(k)) g.set(k, { l, s: 0 });
+        g.get(k).s += (l.gtn || 0) + (l.px != null ? l.sx * l.px : 0);
+      });
+      return [...g.values()];
+    }
+
+    function vch(x) {
+      const ls = Ln.filter(l => l.ph === x), l0 = ls[0];
+      if (!l0) return "";
+      let tot = 0;
+      return `<div class="pb"><h2 style="text-align:center">PHIẾU ${ls.some(l => l.sn != null) ? "NHẬP" : "XUẤT"} KHO</h2><p>Mã phiếu: <b>${esc(x)}</b> &nbsp; Ngày: ${dr(l0.ngay)} &nbsp; Số HĐ: ${esc(l0.hd)} &nbsp; KH/NCC: ${esc(l0.kh)}<br>TK Nợ/Có: ${esc(l0.no)} / ${esc(l0.co)}<br>Nội dung: ${esc(l0.nd)}</p><table><thead>${th(["STT", "Mã hàng", "Tên hàng", "ĐVT", "SL", "Đơn giá", "Thành tiền"], [4, 5, 6])}</thead><tbody>${ls.map((l, i) => {
+        const p = P.find(y => y.ma === l.ma) || {}, n = l.sn != null, gt = n ? l.gtn : (l.px != null ? l.sx * l.px : 0);
+        tot += gt || 0;
+        return `<tr><td>${i + 1}</td><td>${esc(l.ma)}</td><td>${esc(p.ten)}</td><td>${esc(p.dvt)}</td><td class=n>${fmt(n ? l.sn : l.sx)}</td><td class=n>${fmt(n ? l.gn : l.px, 2)}</td><td class=n>${fmt(gt)}</td></tr>`;
+      }).join("")}<tr class="tt"><td colspan=6>CỘNG</td><td class=n>${fmt(tot)}</td></tr></tbody></table><div class="sg"><span>Người lập phiếu</span><span>Thủ kho</span><span>Kế toán trưởng</span></div></div>`;
+    }
+
+    function led(ma, C) {
+      const p = P.find(x => x.ma === ma);
+      if (!p) return "";
+      const [a, b] = rangeOf(s10);
+      const effB = Math.min(b, C.U);
+      const pm = C.M[ma] || {};
+      let s = p.sl, g = p.gt;
+      if (C.U === 0) { s = p.sl; g = p.gt; }
+      else if (a <= C.U && pm[a]) { s = pm[a].dS; g = pm[a].dG; }
+      else if (pm[C.U]) { const z = pm[C.U]; s = z.dS + z.nS - z.xS; g = Math.round((z.dG + z.nG - z.xG) * 100) / 100; }
+
+      const e = "<td></td>", nn = v => `<td class=n>${fmt(v)}</td>`;
+      let R = `<tr>${e}${e}<td>Số dư đầu kỳ</td>${e.repeat(6)}${nn(s)}${nn(g)}${e}</tr>`;
+      let pNS = 0, pNG = 0, pXS = 0, pXG = 0;
+
+      for (let m = a; m <= effB; m++) {
+        const ls = Ln.filter(l => l.ma === ma && l._m === m).sort((x, y) => x.ngay < y.ngay ? -1 : x.ngay > y.ngay ? 1 : 0);
+        if (!ls.length) continue;
+        let nS = 0, nG = 0, xS = 0, xG = 0;
+        ls.forEach(l => {
+          const n = l.sn != null, q = (n ? l.sn : l.sx) || 0, tt = n ? l.gtn : q * (l.px || 0);
+          if (n) { nS += q; nG += tt; s += q; g += tt; }
+          else { xS += q; xG += tt; s -= q; g -= tt; }
+          R += `<tr><td>${esc(l.ph)}</td><td>${dr(l.ngay)}</td><td>${esc(l.nd)}</td><td style="text-align:center">${esc(n ? l.co : l.no)}</td><td class=n>${fmt(n ? l.gn : l.px, 2)}</td>${n ? nn(q) + nn(tt) + e + e : e + e + nn(q) + nn(tt)}${nn(s)}${nn(g)}${e}</tr>`;
+        });
+        pNS += nS; pNG += nG; pXS += xS; pXG += xG;
+        R += `<tr class="tt">${e}${e}<td>Cộng tháng ${m}</td><td style="text-align:center">x</td><td style="text-align:center">x</td>${nn(nS)}${nn(nG)}${nn(xS)}${nn(xG)}${nn(s)}${nn(g)}${e}</tr>`;
+      }
+      const endLbl = s10.t === "Tháng" ? `Số dư cuối tháng ${s10.k}` : s10.t === "Quý" ? `Cộng phát sinh Quý ${s10.k} / Số dư cuối kỳ` : `Cộng phát sinh Năm ${C.Y} / Số dư cuối năm`;
+      R += `<tr class="tt">${e}${e}<td>${endLbl}</td><td style="text-align:center">x</td><td style="text-align:center">x</td>${nn(pNS)}${nn(pNG)}${nn(pXS)}${nn(pXG)}${nn(s)}${nn(g)}${e}</tr>`;
+
+      const hd = `<thead><tr><th colspan=2>Chứng từ</th><th rowspan=2>Diễn giải</th><th rowspan=2>TK đối ứng</th><th rowspan=2>Đơn giá</th><th colspan=2>Nhập</th><th colspan=2>Xuất</th><th colspan=2>Tồn</th><th rowspan=2>Ghi chú</th></tr><tr><th>Số hiệu</th><th>Ngày, tháng</th><th>Số lượng</th><th>Thành tiền</th><th>Số lượng</th><th>Thành tiền</th><th>Số lượng</th><th>Thành tiền</th></tr><tr class="m">${["A", "B", "C", "D", "1", "2", "3=1x2", "4", "5=(1x4)", "6", "7=(1x6)", "8"].map(x => `<td align=center><i>${x}</i></td>`).join("")}</tr></thead>`;
+      const sg = (t, n) => `<span><b>${t}</b><br><i>(Ký, họ tên)</i><br><br><br>${esc(n)}</span>`;
+      const perTitle = s10.t === "Năm" ? `Năm ${C.Y}` : s10.t === "Quý" ? `Quý ${s10.k} năm ${C.Y} (Tháng ${a} - Tháng ${b})` : `Tháng ${String(s10.k).padStart(2, "0")} năm ${C.Y}`;
+
+      return `<div class="pb sc"><div style="display:flex;justify-content:space-between;gap:20px"><div><b>Đơn vị: ${esc(CFG.ten)}</b><br>Địa chỉ: ${esc(CFG.dc)}</div><div style="max-width:320px;font-size:12px"><b>Mẫu số S10-DN</b><br><i>(Kèm theo Thông tư số 99/2025/TT-BTC ngày 27 tháng 10 năm 2025 của Bộ trưởng Bộ Tài chính)</i></div></div><h3 style="text-align:center;margin:10px 0 2px">SỔ CHI TIẾT SẢN PHẨM, HÀNG HOÁ</h3><div style="text-align:center"><i>${perTitle}</i><br><b>Tài khoản: ${esc(CFG.tk)} &nbsp; Tên kho: ${esc(CFG.kho)}</b></div><p>Mã hàng hóa: <b>${esc(p.ma)}</b><br>Tên hàng hóa: <b>${esc(p.ten)}</b> (${esc(p.dvt)})<br><i>Đơn vị tính: vnđ</i></p><div style="overflow-x:auto"><table>${hd}<tbody>${R}</tbody></table></div><p>- Sổ này có ... trang, đánh số từ trang 01 đến trang ...<br>- Ngày mở sổ: 01/${String(a).padStart(2, "0")}/${C.Y}</p><div class="sg">${sg("Người ghi sổ", CFG.ghi)}${sg("Kế toán trưởng", CFG.kt)}<span><i>Ngày..... tháng.... năm ${C.Y}</i><br><b>Người đại diện theo pháp luật</b><br><i>(Ký, họ tên, đóng dấu)</i><br><br><br>${esc(CFG.dd)}</span></div></div>`;
+    }
+
+    function openSc(all, ma) {
+      scAll = all;
+      if (ma) scMa = ma;
+      else if (!all && $("#sp")) scMa = $("#sp").value;
+      s10 = { ...kt };
+      tab = "sc";
+      render();
+    }
+
+    function prn() {
+      if (!ctQ.trim() && ctPer.t === "Tất cả") {
+        st("Nhập mã phiếu vào ô lọc hoặc chọn kỳ cụ thể rồi bấm in", 1); render(); return;
+      }
+      document.body.classList.add("pv");
+      window.print();
+    }
+    window.onafterprint = () => document.body.classList.remove("pv");
+
+    const TP = {
+      dm: [["Mã hàng", "Tên hàng hóa", "ĐVT", "Tồn đầu năm - Số lượng", "Tồn đầu năm - Giá trị"], ["VPP001", "Giấy A4 Double A 70gsm", "Ream", 200, 13600000], ["VPP002", "Bút bi Thiên Long TL-027", "Cây", 1000, 3200000]],
+      ct: [["Mã phiếu", "Ngày", "Số hóa đơn", "Mã KH/Mã NCC", "TK Nợ", "TK Có", "Nội dung phiếu", "Mã hàng", "Nhập - Số lượng", "Nhập - Đơn giá", "Xuất - Số lượng", "Gán đơn giá xuất"], ["NK-0101", "05/01/2026", "0001234", "NCC01", "156", "331", "Nhập hàng từ Cty Hoàng Long", "VPP001", 100, 70000, "", ""], ["XK-0101", "10/01/2026", "0000101", "KH01", "632", "156", "Xuất bán cho Cty ABC", "VPP001", "", "", 120, ""]],
+      kh: [["Mã KH", "Thông tin khách hàng", "MST", "Đầu kỳ"], ["KH01", "Công ty ABC", "0301234567", 5000000]],
+      ncc: [["Mã NCC", "Thông tin nhà cung cấp", "MST", "Đầu kỳ"], ["NCC01", "Công ty Hoàng Long", "0101234567", 12000000]],
+      nk: [["Ngày", "Mã phiếu", "Số hóa đơn", "Nội dung", "TK Nợ", "TK Có", "Số tiền", "Mã KH/Mã NCC"], ["10/01/2026", "BH-0101", "0000101", "Doanh thu bán hàng", "131", "511", 15000000, "KH01"]],
+      tk: [["Mã hàng", "Tên hàng hóa", "ĐVT", "Tồn kho đầu kỳ - Số lượng", "Tồn kho đầu kỳ - Đơn giá", "Tồn kho đầu kỳ - Giá trị"], ["VPP001", "Giấy A4 Double A 70gsm", "Ream", 200, 68000, 13600000]]
+    };
+
+    function tpl(k) {
+      const ws = XLSX.utils.aoa_to_sheet(TP[k]);
+      ws["!cols"] = TP[k][0].map(() => ({ wch: 24 }));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Du lieu");
+      XLSX.writeFile(wb, "mau-import-" + k + ".xlsx");
+    }
+
+    function render() {
+      $("#bsample").style.display = (P.length || Ln.length || NKX.length) ? "none" : "inline-block";
+      $("#nv").innerHTML = TABS.map(t => `<button class="${t[0] === tab || (tab === "sc" && t[0] === "tk") ? "on" : ""}" data-t="${t[0]}">${t[1]}</button>`).join("");
+      const C = calc();
+      let h = msg ? `<div class="st ${merr ? "er" : ""}"><span>${esc(msg)}</span><button class="s" style="padding:1px 6px" onclick="msg='';render()">✕</button></div>` : "";
+      msg = ""; merr = 0;
+
+      if (tab === "dm") {
+        let tSL = 0, tGT = 0;
+        const rows = P.slice(0, 2000).map(p => {
+          tSL += p.sl || 0; tGT += p.gt || 0;
+          return `<tr><td>${esc(p.ma)}</td><td>${esc(p.ten)}</td><td>${esc(p.dvt)}</td><td class=n>${fmt(p.sl)}</td><td class=n>${fmt(p.sl ? p.gt / p.sl : 0, 2)}</td><td class=n>${fmt(p.gt)}</td></tr>`;
+        }).join("");
+        h += `<div class="bar">${upl("dm")}<button class="s" onclick="tpl('dm')">📄 Tải file mẫu</button><span class="m">${P.length} mã hàng.</span></div>
+              <div class="w"><table><thead>${th(["Mã hàng", "Tên hàng hóa", "ĐVT", "Tồn đầu SL", "Đơn giá", "Tồn đầu GT"], [3, 4, 5])}</thead><tbody>${rows}</tbody><tfoot><tr><td colspan=3>TỔNG CỘNG (${P.length} mã)</td><td class=n>${fmt(tSL)}</td><td></td><td class=n>${fmt(tGT)}</td></tr></tfoot></table></div>`;
+      } else if (tab === "ct") {
+        const q = ctQ.trim().toLowerCase();
+        const ls = Ln.filter(l => {
+          if (q && !(l.ph + l.ma + l.kh + l.nd).toLowerCase().includes(q)) return false;
+          if (ctPer.t === "Tất cả") return true;
+          const info = mqyInfo(l.ngay);
+          if (!info || info.y !== ctPer.y) return false;
+          if (ctPer.t === "Năm") return true;
+          if (ctPer.t === "Quý") return info.q === ctPer.k;
+          return info.m === ctPer.k;
+        });
+        let sSN = 0, sGN = 0, sSX = 0, sGX = 0;
+        const rows = ls.slice(0, 800).map(l => {
+          const p = P.find(x => x.ma === l.ma) || {}, e = C.errs.get(l) || "", info = mqyInfo(l.ngay);
+          sSN += l.sn || 0; sGN += l.gtn || 0; sSX += l.sx || 0; sGX += l.px != null ? (l.sx || 0) * l.px : 0;
+          return `<tr class="${e ? "er" : ""}"><td>${info ? info.lbl : "—"}</td><td>${esc(l.ph)}</td><td>${dr(l.ngay)}</td><td>${esc(l.hd)}</td><td>${esc(l.kh)}</td><td>${esc(l.no)}</td><td>${esc(l.co)}</td><td>${esc(l.nd)}</td><td>${esc(l.ma)}</td><td>${esc(p.ten)}</td><td>${esc(p.dvt)}</td><td class=n>${fmt(l.sn)}</td><td class=n>${fmt(l.gn, 2)}</td><td class=n>${fmt(l.gtn)}</td><td class=n>${fmt(l.sx)}</td><td class=n>${l.px == null ? "" : fmt(l.px, 2)}</td><td class=n>${l.px == null ? "" : fmt(l.sx * l.px)}</td><td>${esc(e)}</td></tr>`;
+        }).join("");
+        const ps = (q || ctPer.t !== "Tất cả") ? [...new Set(ls.map(l => l.ph))].filter(Boolean).slice(0, 50) : [];
+        h += `<div class="bar">${upl("ct")}<button class="s" onclick="tpl('ct')">📄 Tải file mẫu</button>
+              <input id="q" placeholder="Lọc phiếu / mã hàng / KH" value="${esc(ctQ)}">
+              <span>Kỳ:</span>
+              <select id="ctPt">${["Tất cả", "Tháng", "Quý", "Năm"].map(x => `<option ${x === ctPer.t ? "selected" : ""}>${x}</option>`).join("")}</select>
+              ${ctPer.t === "Tháng" ? `<select id="ctPk">${Array.from({ length: 12 }, (_, i) => i + 1).map(m => `<option value="${m}" ${m === ctPer.k ? "selected" : ""}>Tháng ${String(m).padStart(2, "0")}</option>`).join("")}</select>` : ""}
+              ${ctPer.t === "Quý" ? `<select id="ctPk">${[1, 2, 3, 4].map(q => `<option value="${q}" ${q === ctPer.k ? "selected" : ""}>Quý ${q}</option>`).join("")}</select>` : ""}
+              ${ctPer.t !== "Tất cả" ? `<input id="ctPy" type="number" value="${ctPer.y}">` : ""}
+              <button class="s" onclick="prn()">🖨 In phiếu</button>
+              <span class="m">${ls.length}/${Ln.length} dòng · ${C.errs.size} lỗi</span></div>
+              <div class="w"><table><thead>${th(["Kỳ (T/Q/N)", "Mã phiếu", "Ngày", "Số HĐ", "KH/NCC", "Nợ", "Có", "Nội dung", "Mã hàng", "Tên hàng", "ĐVT", "Nhập SL", "Nhập ĐG", "Nhập GT", "Xuất SL", "Xuất ĐG", "Xuất GT", "Kiểm tra"], [11, 12, 13, 14, 15, 16])}</thead><tbody>${rows}</tbody><tfoot><tr><td colspan=11>CỘNG KỲ ĐANG LỌC (${ls.length} dòng)</td><td class=n>${fmt(sSN)}</td><td></td><td class=n>${fmt(sGN)}</td><td class=n>${fmt(sSX)}</td><td></td><td class=n>${fmt(sGX)}</td><td></td></tr></tfoot></table></div>
+              <div class="pvs">${ps.map(vch).join("")}</div>`;
+      } else if (tab === "tk") {
+        const [a, b] = rangeOf(kt);
+        if (!scMa && P[0]) scMa = P[0].ma;
+        let T = { dS: 0, dG: 0, nS: 0, nG: 0, xS: 0, xG: 0, cS: 0, cG: 0 };
+        const rows = P.map(p => {
+          const m = C.M[p.ma] || {}, f = m[a];
+          let dS = f ? f.dS : 0, dG = f ? f.dG : 0;
+          if (!f && C.U === 0) { dS = p.sl; dG = p.gt; }
+          else if (!f && a > C.U && m[C.U]) { const z = m[C.U]; dS = z.dS + z.nS - z.xS; dG = Math.round((z.dG + z.nG - z.xG) * 100) / 100; }
+          let nS = 0, nG = 0, xS = 0, xG = 0;
+          for (let i = a; i <= b; i++) if (m[i]) { nS += m[i].nS; nG += m[i].nG; xS += m[i].xS; xG += m[i].xG; }
+          const cS = dS + nS - xS, cG = Math.round((dG + nG - xG) * 100) / 100;
+          T.dS += dS; T.dG += dG; T.nS += nS; T.nG += nG; T.xS += xS; T.xG += xG; T.cS += cS; T.cG += cG;
+          return `<tr class="${scMa === p.ma ? "sel" : ""}" data-row-ma="${esc(p.ma)}" style="cursor:pointer"><td>${esc(p.ma)}</td><td>${esc(p.ten)}</td><td>${esc(p.dvt)}</td><td class=n>${fmt(dS)}</td><td class=n>${fmt(dS ? dG / dS : 0, 2)}</td><td class=n>${fmt(dG)}</td><td class=n>${fmt(nS)}</td><td class=n>${fmt(nG)}</td><td class=n>${fmt(xS)}</td><td class=n>${fmt(xG)}</td><td class=n>${fmt(cS)}</td><td class=n>${fmt(cS ? cG / cS : 0, 2)}</td><td class=n>${fmt(cG)}</td><td class="noprint"><button class="s" style="padding:2px 6px" onclick="event.stopPropagation();openSc(false,'${esc(p.ma)}')">In S10-DN</button></td></tr>`;
+        }).join("");
+
+        h += `${coHead()}
+              <div class="bar noprint">${upl("dm")}<button class="s" onclick="tpl('tk')">📄 Tải file mẫu</button>
+              <select id="kt">${["Tháng", "Quý", "Năm"].map(x => `<option ${x === kt.t ? "selected" : ""}>${x}</option>`).join("")}</select>
+              <input id="kk" type="number" min="1" max="${kt.t === "Quý" ? 4 : 12}" value="${kt.k}" ${kt.t === "Năm" ? "disabled" : ""}>
+              <button class="s" onclick="window.print()">🖨 In bảng tổng hợp</button>
+              <select id="sp">${P.map(p => `<option value="${esc(p.ma)}" ${p.ma === scMa ? "selected" : ""}>${esc(p.ma)} - ${esc(p.ten)}</option>`).join("")}</select>
+              <button onclick="openSc(false)">📒 In S10-DN (${esc(scMa)})</button>
+              <button class="s" onclick="openSc(true)">In sổ tất cả mặt hàng</button></div>
+              ${b > C.U ? `<div class="st er">Kỳ này có tháng chưa tính giá (đã tính đến tháng ${C.U}).</div>` : ""}
+              <h3 style="margin:0">TỔNG HỢP NHẬP - XUẤT - TỒN KHO, ${kt.t.toUpperCase()} ${kt.t === "Năm" ? "" : kt.k + "/"}${C.Y}</h3>
+              <div class="w"><table><thead>${th(["Mã hàng", "Tên hàng hóa", "ĐVT", "Đầu SL", "Đầu ĐG", "Đầu GT", "Nhập SL", "Nhập GT", "Xuất SL", "Xuất GT", "Cuối SL", "Cuối ĐG", "Cuối GT", "S10-DN"], [3, 4, 5, 6, 7, 8, 9, 10, 11, 12])}
+              <tr class="tt"><td colspan=3>TỔNG CỘNG (${P.length} mã)</td><td class=n>${fmt(T.dS)}</td><td></td><td class=n>${fmt(T.dG)}</td><td class=n>${fmt(T.nS)}</td><td class=n>${fmt(T.nG)}</td><td class=n>${fmt(T.xS)}</td><td class=n>${fmt(T.xG)}</td><td class=n>${fmt(T.cS)}</td><td></td><td class=n>${fmt(T.cG)}</td><td class="noprint"></td></tr></thead>
+              <tbody>${rows}</tbody></table></div>`;
+      } else if (tab === "sc") {
+        const [, b] = rangeOf(s10);
+        const used = new Set(Ln.map(l => l.ma));
+        h += `<div class="bar noprint"><button class="s" onclick="tab='tk';render()">← Quay lại</button>
+              <span>Kỳ in sổ:</span>
+              <select id="s10t">${["Tháng", "Quý", "Năm"].map(x => `<option ${x === s10.t ? "selected" : ""}>${x}</option>`).join("")}</select>
+              ${s10.t !== "Năm" ? `<select id="s10k">${Array.from({ length: s10.t === "Quý" ? 4 : 12 }, (_, i) => i + 1).map(v => `<option value="${v}" ${v === s10.k ? "selected" : ""}>${s10.t} ${v}</option>`).join("")}</select>` : ""}
+              <select id="s10ma" ${scAll ? "disabled" : ""}>${P.map(p => `<option value="${esc(p.ma)}" ${p.ma === scMa ? "selected" : ""}>${esc(p.ma)} - ${esc(p.ten)}</option>`).join("")}</select>
+              <label><input id="s10all" type="checkbox" ${scAll ? "checked" : ""}> In tất cả mặt hàng</label>
+              <button onclick="window.print()">🖨 In sổ S10-DN</button></div>
+              ${b > C.U ? `<div class="st wn">Lưu ý: Kỳ chọn vượt quá tháng đang tính giá (${C.U}).</div>` : ""}
+              <div class="sc-wrap">${scAll ? P.filter(p => p.sl || used.has(p.ma)).map(p => led(p.ma, C)).join("") : led(scMa || (P[0] || {}).ma, C)}</div>`;
+      } else if (tab === "nk") {
+        const R = nkG().map(({ l, s }) => ({ ngay: l.ngay, ph: l.ph, hd: l.hd, nd: l.nd, no: l.no, co: l.co, s, kh: l.kh })).concat(NKX.map(x => ({ ngay: x.ngay, ph: x.ph, hd: x.hd, nd: x.nd, no: x.no, co: x.co, s: x.tien, kh: x.kh }))).sort((a, b) => a.ngay < b.ngay ? -1 : a.ngay > b.ngay ? 1 : 0);
+        const tot = R.reduce((a, r) => a + (r.s || 0), 0);
+        h += `<div class="bar noprint">${upl("nk")}<button class="s" onclick="tpl('nk')">📄 Tải file mẫu</button><button onclick="window.print()">🖨 In</button><span class="m">${R.length - NKX.length} dòng từ kho + ${NKX.length} bút toán import.</span></div>${coHead()}<h3 style="margin:0">NHẬT KÝ CHUNG - NĂM ${C.Y}</h3><div class="w"><table><thead>${th(["Ngày", "Mã phiếu", "Số HĐ", "Nội dung", "TK Nợ", "TK Có", "Số tiền", "Mã KH/NCC"], [6])}</thead><tbody>${R.slice(0, 3000).map(r => `<tr><td>${r.ngay ? dr(r.ngay) : ""}</td><td>${esc(r.ph)}</td><td>${esc(r.hd)}</td><td>${esc(r.nd)}</td><td>${esc(r.no)}</td><td>${esc(r.co)}</td><td class=n>${fmt(r.s)}</td><td>${esc(r.kh)}</td></tr>`).join("")}</tbody><tfoot><tr><td colspan=6>TỔNG CỘNG</td><td class=n>${fmt(tot)}</td><td></td></tr></tfoot></table></div>`;
+      } else if (tab === "kh" || tab === "ncc") {
+        const A = tab === "kh" ? KH : NCC, pre = tab === "kh" ? "131" : "331", ps = new Map();
+        A.forEach(a => ps.set(a.ma, { ...a, n: 0, c: 0 }));
+        nkG().concat(NKX.map(x => ({ l: x, s: x.tien }))).forEach(({ l, s }) => {
+          const d = String(l.no).startsWith(pre), c = String(l.co).startsWith(pre);
+          if (!l.kh || (!d && !c)) return;
+          if (!ps.has(l.kh)) ps.set(l.kh, { ma: l.kh, ten: "(chưa có trong danh mục)", mst: "", dau: 0, n: 0, c: 0 });
+          const o = ps.get(l.kh); if (d) o.n += s; if (c) o.c += s;
+        });
+        const T = [0, 0, 0, 0], rows = [...ps.values()].map(o => {
+          const cu = tab === "kh" ? o.dau + o.n - o.c : o.dau + o.c - o.n;
+          T[0] += o.dau; T[1] += o.n; T[2] += o.c; T[3] += cu;
+          return `<tr><td>${esc(o.ma)}</td><td>${esc(o.ten)}</td><td>${esc(o.mst)}</td><td class=n>${fmt(o.dau)}</td><td class=n>${fmt(o.n)}</td><td class=n>${fmt(o.c)}</td><td class=n>${fmt(cu)}</td></tr>`;
+        }).join("");
+        h += `<div class="bar">${upl(tab)}<button class="s" onclick="tpl('${tab}')">📄 Tải file mẫu</button></div><div class="w"><table><thead>${th([tab === "kh" ? "Mã KH" : "Mã NCC", tab === "kh" ? "Thông tin khách hàng" : "Thông tin nhà cung cấp", "MST", "Đầu kỳ", "Phát sinh Nợ", "Phát sinh Có", "Cuối kỳ"], [3, 4, 5, 6])}<tr class="tt"><td colspan=3>TỔNG CỘNG</td>${T.map(v => `<td class=n>${fmt(v)}</td>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
+      } else if (tab === "cf") {
+        h += `<div style="overflow:auto"><h3>Thông tin doanh nghiệp</h3><div class="fm">${[["ten", "Tên đơn vị"], ["dc", "Địa chỉ"], ["mst", "Mã số thuế"], ["tk", "Tài khoản kho (VD 156)"], ["kho", "Tên kho"], ["ghi", "Người ghi sổ"], ["kt", "Kế toán trưởng"], ["dd", "Người đại diện theo pháp luật"]].map(([k, t]) => `<label>${t}</label><input data-c="${k}" value="${esc(CFG[k])}">`).join("")}</div></div>`;
+      }
+      $("#mn").innerHTML = h;
+    }
+
+    document.addEventListener("click", e => {
+      const t = e.target.closest("[data-t]");
+      if (t) { tab = t.dataset.t; render(); return; }
+      const r = e.target.closest("tr[data-row-ma]");
+      if (r && tab === "tk") { scMa = r.dataset.rowMa; render(); }
+    });
+    document.addEventListener("change", e => {
+      const t = e.target;
+      if (t.dataset.i && t.files[0]) importFile(t.files[0], t.dataset.i);
+      else if (t.id === "kt") { kt.t = t.value; kt.k = 1; render(); }
+      else if (t.id === "kk") { kt.k = +t.value; render(); }
+      else if (t.id === "sp") { scMa = t.value; render(); }
+      else if (t.id === "s10t") { s10.t = t.value; s10.k = 1; render(); }
+      else if (t.id === "s10k") { s10.k = +t.value; render(); }
+      else if (t.id === "s10ma") { scMa = t.value; render(); }
+      else if (t.id === "s10all") { scAll = t.checked; render(); }
+      else if (t.id === "ctPt") { ctPer.t = t.value; ctPer.k = 1; render(); }
+      else if (t.id === "ctPk") { ctPer.k = +t.value; render(); }
+      else if (t.id === "ctPy") { ctPer.y = +t.value; render(); }
+      else if (t.id === "yr" || t.id === "up") { saveLocal(); render(); }
+    });
+    document.addEventListener("input", e => {
+      if (e.target.id === "q") {
+        ctQ = e.target.value; render();
+        const q = $("#q"); if (q) { q.focus(); q.setSelectionRange(ctQ.length, ctQ.length); }
+      } else if (e.target.dataset.c) {
+        CFG[e.target.dataset.c] = e.target.value; saveLocal();
+      }
+    });
+
+    $("#bexp").onclick = () => {
+      const b = new Blob([JSON.stringify({ yr: +$("#yr").value, up: +$("#up").value, P, Ln, NKX, KH, NCC, CFG }, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(b);
+      a.download = "so-ke-toan-kho-" + $("#yr").value + ".json";
+      a.click();
+    };
+    $("#fimp").onchange = async e => {
+      const f = e.target.files[0]; if (!f) return;
+      try {
+        const d = JSON.parse(await f.text());
+        P.length = 0; Ln.length = 0; NKX.length = 0; KH.length = 0; NCC.length = 0;
+        if (d.yr) $("#yr").value = d.yr;
+        if (d.up != null) $("#up").value = d.up;
+        P.push(...(d.P || [])); Ln.push(...(d.Ln || [])); NKX.push(...(d.NKX || []));
+        KH.push(...(d.KH || [])); NCC.push(...(d.NCC || [])); Object.assign(CFG, d.CFG || {});
+        saveLocal(); st("Đã khôi phục dữ liệu từ file JSON."); render();
+      } catch (err) { st("File JSON không hợp lệ.", 1); render(); }
+    };
+    $("#bclear").onclick = () => {
+      $("#mdl").innerHTML = `<div class="modal-bg"><div class="modal"><h3>Xóa toàn bộ dữ liệu?</h3><p>Toàn bộ danh mục, xuất nhập, công nợ đang lưu trên trình duyệt sẽ bị xóa.</p><div class="modal-actions"><button class="s" onclick="document.getElementById('mdl').innerHTML=''">Hủy</button><button class="d" id="m-clr">Xóa tất cả</button></div></div></div>`;
+      $("#m-clr").onclick = () => {
+        P.length = 0; Ln.length = 0; NKX.length = 0; KH.length = 0; NCC.length = 0; scMa = "";
+        localStorage.removeItem(STORE_KEY); $("#mdl").innerHTML = "";
+        st("Đã xóa dữ liệu."); render();
+      };
+    };
+    $("#bsample").onclick = () => {
+      P.push({ ma: "VPP001", ten: "Giấy A4 Double A 70gsm", dvt: "Ream", sl: 200, gt: 13600000 }, { ma: "VPP002", ten: "Bút bi Thiên Long TL-027", dvt: "Cây", sl: 1000, gt: 3200000 });
+      Ln.push({ ph: "NK-0101", ngay: "2026-01-05", hd: "0001234", kh: "NCC01", no: "156", co: "331", nd: "Nhập hàng từ Cty Hoàng Long", ma: "VPP001", sn: 100, gn: 70000, sx: null, gi: null }, { ph: "XK-0101", ngay: "2026-01-10", hd: "0000101", kh: "KH01", no: "632", co: "156", nd: "Xuất bán cho Cty ABC", ma: "VPP001", sn: null, gn: null, sx: 120, gi: null });
+      KH.push({ ma: "KH01", ten: "Công ty ABC", mst: "0301234567", dau: 5000000 });
+      NCC.push({ ma: "NCC01", ten: "Công ty Hoàng Long", mst: "0101234567", dau: 12000000 });
+      Object.assign(CFG, { ten: "CÔNG TY TNHH MINH ANH", dc: "128 Nguyễn Thị Minh Khai, Q3, TP.HCM", mst: "0314567890" });
+      saveLocal(); st("Đã nạp dữ liệu mẫu."); render();
+    };
+
+    loadLocal();
+    render();
+  </script>
+</body>
+</html>
