@@ -143,7 +143,15 @@
     tr:hover td { background: rgba(148, 163, 184, 0.08); }
     tr.sel td { background: var(--sel) !important; }
     tr.br td { background: rgba(59, 130, 246, 0.08); }
+    tr.ret td { background: #e0f2fe; color: #0c4a6e; }
+    tr.ret-ok td { background: rgba(14, 165, 233, 0.08); }
     tr.er td { background: var(--er); color: var(--er-fg); }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme=light]) tr.ret td { background: #082f49; color: #bae6fd; }
+      :root:not([data-theme=light]) .st.bl { background: #082f49; color: #bae6fd; border-color: #0369a1; }
+      :root:not([data-theme=light]) .ret-btn { background: #082f49; color: #bae6fd; border-color: #0369a1; }
+    }
+    .neg { color: #dc2626; font-weight: 700; }
     tr.tt td, tfoot td { font-weight: 700; background: var(--card); color: var(--fg); }
     tfoot td { border-top: 1px solid var(--line); }
     .m { color: var(--mut); font-size: 15px; }
@@ -161,6 +169,7 @@
     }
     .st.er { background: var(--er); color: var(--er-fg); }
     .st.wn { background: var(--warn); color: var(--warn-fg); }
+    .st.bl { background: #e0f2fe; color: #0c4a6e; border: 1px solid #7dd3fc; }
     .fm { display: grid; grid-template-columns: 230px minmax(0, 440px); gap: 8px; align-items: center; }
     .sg { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; margin-top: 16px; gap: 12px; }
     .sc-wrap { flex: 1; min-height: 0; overflow: auto; }
@@ -195,6 +204,8 @@
     .only-prn { display: none; }
     .err-btn { background: var(--er); color: var(--er-fg); border-color: #fca5a5; }
     .err-btn.on { background: #dc2626; color: #fff; border-color: #dc2626; }
+    .ret-btn { background: #e0f2fe; color: #0369a1; border-color: #7dd3fc; }
+    .ret-btn.on { background: #0284c7; color: #fff; border-color: #0284c7; }
     .nk-gc { width: 195px; padding: 3px 6px; font-size: 15px; border-color: transparent; background: transparent; }
     .nk-gc:hover, .nk-gc:focus { border-color: var(--line); background: var(--surface); }
     @media print {
@@ -304,8 +315,10 @@
     let vpddPer = { t: "Tất cả", k: 1, y: 2026 };
     let ctQ = "", vpddQ = "";
     let ctSort = { k: "", d: 1 }, vpddSort = { k: "", d: 1 };
-    let ctErrTop = true, ctOnlyErr = false;
-    let vpddErrTop = true, vpddOnlyErr = false;
+    let ctErrTop = true, ctOnlyErr = false, ctOnlyRet = false;
+    let vpddErrTop = true, vpddOnlyErr = false, vpddOnlyRet = false;
+    let tkNegTop = true, tkOnlyNeg = false;
+    let tkVpNegTop = true, tkVpOnlyNeg = false;
     let editLine = null; // { isVp, isNew, draft }
     let editDm = null; // { origMa, draft }
     let editTk = null; // { isVp, ma, ten, dvt, sl, gt }
@@ -320,8 +333,8 @@
     let khQ = "", khPer = { t: "Tất cả", k: 1, y: 2026 }, khSort = { k: "", d: 1 };
     let nccQ = "", nccPer = { t: "Tất cả", k: 1, y: 2026 }, nccSort = { k: "", d: 1 };
     let cfQ = "";
-    let selTk = "156", s38Per = { t: "Năm", k: 1 }, s38Sub = false;
-    let soCaiPer = { t: "Năm", k: 1 }, soCaiSub = false;
+    let selTk = "156", s38Per = { t: "Năm", k: 1 }, s38Sub = false, s38AllowNeg = true;
+    let soCaiPer = { t: "Năm", k: 1 }, soCaiSub = false, soCaiAllowNeg = true;
     let msg = "", merr = 0;
 
     const TABS = [
@@ -410,15 +423,33 @@
         ma: ["makh", "ma", "makhachhang"],
         ten: ["thongtinkhachhang", "thongtin", "tenkhachhang", "ten"],
         mst: ["mst", "masothue"],
+        dauNo: ["dunodauky", "nodauky", "duno", "soduno", "dauno", "sodunodauky"],
+        dauCo: ["ducodauky", "codauky", "duco", "soduco", "dauco", "soducodauky"],
         dau: ["dauky", "sodudauky", "dudauky"]
       },
       ncc: {
         ma: ["mancc", "ma", "manhacungcap"],
         ten: ["thongtinnhacungcap", "thongtinkhachhang", "thongtin", "tennhacungcap", "ten"],
         mst: ["mst", "masothue"],
+        dauNo: ["dunodauky", "nodauky", "duno", "soduno", "dauno", "sodunodauky"],
+        dauCo: ["ducodauky", "codauky", "duco", "soduco", "dauco", "soducodauky"],
         dau: ["dauky", "sodudauky", "dudauky"]
       }
     };
+
+    function getPartnerOpening(p, kind) {
+      if (p.dauNo != null || p.dauCo != null) {
+        return {
+          dauNo: Math.round(Number(p.dauNo) || 0),
+          dauCo: Math.round(Number(p.dauCo) || 0)
+        };
+      }
+      const legacy = Math.round(Number(p.dau) || 0);
+      if (kind === "kh") {
+        return { dauNo: legacy > 0 ? legacy : 0, dauCo: legacy < 0 ? -legacy : 0 };
+      }
+      return { dauNo: legacy < 0 ? -legacy : 0, dauCo: legacy > 0 ? legacy : 0 };
+    }
 
     function toDate(v) {
       if (v instanceof Date && !isNaN(v.getTime())) return new Date(v.getTime() - v.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
@@ -538,9 +569,25 @@
           } else if (kind === "kh" || kind === "ncc") {
             const A = kind === "kh" ? KH : NCC;
             A.length = 0;
+            const hasSplitCols = map.dauNo != null || map.dauCo != null;
             rows.forEach(r => {
               const ma = String(g(r, "ma")).trim();
-              if (ma) A.push({ ma, ten: String(g(r, "ten")), mst: String(g(r, "mst")), dau: Math.round(num(g(r, "dau")) || 0) });
+              if (ma) {
+                const rawNo = num(g(r, "dauNo"));
+                const rawCo = num(g(r, "dauCo"));
+                const rawLegacy = num(g(r, "dau"));
+                const op = hasSplitCols
+                  ? { dauNo: Math.round(rawNo || 0), dauCo: Math.round(rawCo || 0) }
+                  : getPartnerOpening({ dau: Math.round(rawLegacy || 0) }, kind);
+                A.push({
+                  ma,
+                  ten: String(g(r, "ten") ?? "").trim(),
+                  mst: String(g(r, "mst") ?? "").trim(),
+                  dauNo: op.dauNo,
+                  dauCo: op.dauCo,
+                  dau: kind === "kh" ? op.dauNo - op.dauCo : op.dauCo - op.dauNo
+                });
+              }
             });
           } else {
             const isVpdd = kind === "ct_vpdd";
@@ -586,13 +633,15 @@
       const Y = +$("#yr").value, U = +$("#up").value;
       const pm = {}; products.forEach(p => pm[p.ma] = p);
       const M = {}; products.forEach(p => M[p.ma] = {});
-      const first = {}, errs = new Map();
+      const first = {}, errs = new Map(), retWarns = new Map();
       lines.forEach(l => {
         l._m = l.ngay && +l.ngay.slice(0, 4) === Y ? +l.ngay.slice(5, 7) : 0;
         l.gn = l.gn != null ? Math.round(l.gn) : null;
         l.gtn = l.sn != null ? Math.round(l.sn * (l.gn || 0)) : null;
         l.px = null;
         l.gx = null;
+        l._isRet = l.sx != null && l.sx < 0;
+        l._retWarn = (l._isRet && l.gi == null) ? "Yêu cầu nhập giá cho hàng hóa khách hàng trả lại" : "";
         let e = "";
         if (!l.ph) e = "Thiếu mã phiếu";
         else if (!l.ngay) e = "Thiếu ngày";
@@ -600,37 +649,67 @@
         else if (!pm[l.ma]) e = "Mã hàng chưa có trong danh mục";
         if (l.ph && !first[l.ph]) first[l.ph] = l;
         if (e) errs.set(l, e);
+        if (l._retWarn) retWarns.set(l, l._retWarn);
       });
       products.forEach(p => {
         let s = p.sl, g = Math.round(p.gt);
         for (let m = 1; m <= U; m++) {
           const ls = lines.filter(l => l.ma === p.ma && l._m === m).sort((a, b) => a.ngay < b.ngay ? -1 : a.ngay > b.ngay ? 1 : 0);
-          let nS = 0, nG = 0, xS = 0;
-          ls.forEach(l => { nS += l.sn || 0; nG += l.gtn || 0; xS += l.sx || 0; });
-          const availS = s + nS, availG = Math.max(0, Math.round(g + nG));
-          const pr = availS > 0 ? Math.round(availG / availS) : 0;
-          const exps = ls.filter(l => (l.sx || 0) > 0);
-          const endS = availS - xS;
-          let cumGx = 0;
+          let nS = 0, nG = 0, posXS = 0, retS = 0, retG = 0;
+          const exps = [];
+          ls.forEach(l => {
+            nS += l.sn || 0;
+            nG += l.gtn || 0;
+            const sxVal = l.sx || 0;
+            if (sxVal < 0) {
+              if (l.gi != null) {
+                const pxVal = Math.round(l.gi);
+                l.px = pxVal;
+                l.gx = Math.round(sxVal * pxVal);
+                retG += l.gx;
+              } else {
+                l.px = null;
+                l.gx = null;
+              }
+              retS += sxVal;
+            } else if (sxVal > 0) {
+              posXS += sxVal;
+              exps.push(l);
+            }
+          });
+          // retS / retG are negative for customer returns, so subtracting adds returned stock back
+          const availS = s + nS - retS;
+          const availG = Math.round(g + nG - retG);
+          const pr = availS > 0 && availG > 0 ? Math.round(availG / availS) : 0;
+          const endS = availS - posXS;
+          let cumPosGx = 0;
           exps.forEach((l, idx) => {
             const qty = l.sx || 0;
-            const remG = Math.max(0, availG - cumGx);
-            if (idx === exps.length - 1 && endS <= 0) {
-              l.gx = remG;
-              l.px = qty > 0 ? Math.round(l.gx / qty) : 0;
+            if (endS >= 0) {
+              const remG = Math.max(0, availG - cumPosGx);
+              if (idx === exps.length - 1 && endS === 0) {
+                l.gx = remG;
+                l.px = qty > 0 ? Math.round(l.gx / qty) : 0;
+              } else {
+                const unitP = l.gi != null ? Math.round(l.gi) : pr;
+                l.gx = Math.min(remG, Math.max(0, Math.round(qty * unitP)));
+                l.px = unitP;
+              }
             } else {
               const unitP = l.gi != null ? Math.round(l.gi) : pr;
-              l.gx = Math.min(remG, Math.max(0, Math.round(qty * unitP)));
               l.px = unitP;
+              l.gx = Math.round(qty * unitP);
             }
-            cumGx += l.gx || 0;
+            cumPosGx += l.gx || 0;
           });
-          M[p.ma][m] = { dS: s, dG: g, nS, nG, xS, xG: cumGx, pr };
-          s = Math.max(0, availS - xS);
-          g = s === 0 ? 0 : Math.max(0, availG - cumGx);
+          const xS = retS + posXS;
+          const xG = retG + cumPosGx;
+          M[p.ma][m] = { dS: s, dG: g, nS, nG, xS, xG, pr };
+          s = s + nS - xS;
+          g = s === 0 ? 0 : Math.round(g + nG - xG);
         }
       });
-      return { M, errs, Y, U };
+      return { M, errs, retWarns, Y, U };
     }
 
     function getVpddProducts() {
@@ -684,10 +763,10 @@
       let s = p.sl, g = Math.round(p.gt);
       if (C.U === 0) { s = p.sl; g = Math.round(p.gt); }
       else if (a <= C.U && pm[a]) { s = pm[a].dS; g = pm[a].dG; }
-      else if (pm[C.U]) { const z = pm[C.U]; s = Math.max(0, z.dS + z.nS - z.xS); g = s === 0 ? 0 : Math.max(0, Math.round(z.dG + z.nG - z.xG)); }
+      else if (pm[C.U]) { const z = pm[C.U]; s = z.dS + z.nS - z.xS; g = s === 0 ? 0 : Math.round(z.dG + z.nG - z.xG); }
 
-      const e = "<td></td>", nn = v => `<td class=n>${fmt(v)}</td>`;
-      let R = `<tr>${e}${e}<td>Số dư đầu kỳ</td>${e.repeat(6)}${nn(s)}${nn(g)}${e}</tr>`;
+      const e = "<td></td>", nn = v => `<td class=n>${fmt(v)}</td>`, nnBal = v => `<td class="n${v < 0 ? " neg" : ""}">${fmt(v)}</td>`;
+      let R = `<tr>${e}${e}<td>Số dư đầu kỳ</td>${e.repeat(6)}${nnBal(s)}${nnBal(g)}${e}</tr>`;
       let pNS = 0, pNG = 0, pXS = 0, pXG = 0;
 
       for (let m = a; m <= effB; m++) {
@@ -696,15 +775,15 @@
         let nS = 0, nG = 0, xS = 0, xG = 0;
         ls.forEach(l => {
           const n = l.sn != null, q = (n ? l.sn : l.sx) || 0, tt = n ? (l.gtn || 0) : (l.gx || 0);
-          if (n) { nS += q; nG += tt; s += q; g += tt; }
-          else { xS += q; xG += tt; s = Math.max(0, s - q); g = s === 0 ? 0 : Math.max(0, g - tt); }
-          R += `<tr><td>${esc(l.ph)}</td><td>${dr(l.ngay)}</td><td>${esc(l.nd)}</td><td style="text-align:center">${esc(n ? l.co : l.no)}</td><td class=n>${fmt(n ? l.gn : l.px)}</td>${n ? nn(q) + nn(tt) + e + e : e + e + nn(q) + nn(tt)}${nn(s)}${nn(g)}${e}</tr>`;
+          if (n) { nS += q; nG += tt; s += q; g = Math.round(g + tt); }
+          else { xS += q; xG += tt; s -= q; g = s === 0 ? 0 : Math.round(g - tt); }
+          R += `<tr><td>${esc(l.ph)}</td><td>${dr(l.ngay)}</td><td>${esc(l.nd)}</td><td style="text-align:center">${esc(n ? l.co : l.no)}</td><td class=n>${fmt(n ? l.gn : l.px)}</td>${n ? nn(q) + nn(tt) + e + e : e + e + nn(q) + nn(tt)}${nnBal(s)}${nnBal(g)}${e}</tr>`;
         });
         pNS += nS; pNG += nG; pXS += xS; pXG += xG;
-        R += `<tr class="tt">${e}${e}<td>Cộng tháng ${m}</td><td style="text-align:center">x</td><td style="text-align:center">x</td>${nn(nS)}${nn(nG)}${nn(xS)}${nn(xG)}${nn(s)}${nn(g)}${e}</tr>`;
+        R += `<tr class="tt">${e}${e}<td>Cộng tháng ${m}</td><td style="text-align:center">x</td><td style="text-align:center">x</td>${nn(nS)}${nn(nG)}${nn(xS)}${nn(xG)}${nnBal(s)}${nnBal(g)}${e}</tr>`;
       }
       const endLbl = s10.t === "Tháng" ? `Số dư cuối tháng ${s10.k}` : s10.t === "Quý" ? `Cộng phát sinh Quý ${s10.k} / Số dư cuối kỳ` : `Cộng phát sinh Năm ${C.Y} / Số dư cuối năm`;
-      R += `<tr class="tt">${e}${e}<td>${endLbl}</td><td style="text-align:center">x</td><td style="text-align:center">x</td>${nn(pNS)}${nn(pNG)}${nn(pXS)}${nn(pXG)}${nn(s)}${nn(g)}${e}</tr>`;
+      R += `<tr class="tt">${e}${e}<td>${endLbl}</td><td style="text-align:center">x</td><td style="text-align:center">x</td>${nn(pNS)}${nn(pNG)}${nn(pXS)}${nn(pXG)}${nnBal(s)}${nnBal(g)}${e}</tr>`;
 
       const hd = `<thead><tr><th colspan=2>Chứng từ</th><th rowspan=2>Diễn giải</th><th rowspan=2>TK đối ứng</th><th rowspan=2>Đơn giá</th><th colspan=2>Nhập</th><th colspan=2>Xuất</th><th colspan=2>Tồn</th><th rowspan=2>Ghi chú</th></tr><tr><th>Số hiệu</th><th>Ngày, tháng</th><th>Số lượng</th><th>Thành tiền</th><th>Số lượng</th><th>Thành tiền</th><th>Số lượng</th><th>Thành tiền</th></tr><tr class="m">${["A", "B", "C", "D", "1", "2", "3=1x2", "4", "5=(1x4)", "6", "7=(1x6)", "8"].map(x => `<td align=center><i>${x}</i></td>`).join("")}</tr></thead>`;
       const sg = (t, n) => `<span><b>${t}</b><br><i>(Ký, họ tên)</i><br><br><br>${esc(n)}</span>`;
@@ -743,8 +822,8 @@
       dm: [["Mã hàng", "Tên hàng hóa", "ĐVT", "Tồn đầu năm - Số lượng", "Tồn đầu năm - Giá trị"], ["VPP001", "Giấy A4 Double A 70gsm", "Ream", 200, 13600000], ["VPP002", "Bút bi Thiên Long TL-027", "Cây", 1000, 3200000]],
       ct: [["Mã phiếu", "Ngày", "Số hóa đơn", "Mã KH/Mã NCC", "TK Nợ", "TK Có", "Nội dung phiếu", "Mã hàng", "Nhập - Số lượng", "Nhập - Đơn giá", "Xuất - Số lượng", "Gán đơn giá xuất"], ["NK-0101", "05/01/2026", "0001234", "NCC01", "156", "331", "Nhập hàng từ Cty Hoàng Long", "VPP001", 100, 70000, "", ""], ["DC-0101", "15/01/2026", "0000105", "VPDD", "1368", "156", "Xuất chuyển kho VPĐD", "VPP001", "", "", 50, ""]],
       ct_vpdd: [["Mã phiếu", "Ngày", "Số hóa đơn", "Mã KH/Mã NCC", "TK Nợ", "TK Có", "Nội dung phiếu", "Mã hàng", "Nhập - Số lượng", "Nhập - Đơn giá", "Xuất - Số lượng", "Gán đơn giá xuất"], ["XVP-0101", "20/01/2026", "0000201", "KH02", "632", "1368", "Xuất kho VPĐD bán khách lẻ", "VPP001", "", "", 20, ""]],
-      kh: [["Mã KH", "Thông tin khách hàng", "MST", "Đầu kỳ"], ["KH01", "Công ty ABC", "0301234567", 5000000]],
-      ncc: [["Mã NCC", "Thông tin nhà cung cấp", "MST", "Đầu kỳ"], ["NCC01", "Công ty Hoàng Long", "0101234567", 12000000]],
+      kh: [["Mã KH", "Thông tin khách hàng", "MST", "Dư Nợ đầu kỳ", "Dư Có đầu kỳ"], ["KH01", "Công ty ABC", "0301234567", 5000000, 0]],
+      ncc: [["Mã NCC", "Thông tin nhà cung cấp", "MST", "Dư Nợ đầu kỳ", "Dư Có đầu kỳ"], ["NCC01", "Công ty Hoàng Long", "0101234567", 0, 12000000]],
       nk: [["Ngày", "Mã phiếu", "Số hóa đơn", "Nội dung", "TK Nợ", "TK Có", "Số tiền", "Mã KH/Mã NCC", "Ghi chú"], ["10/01/2026", "BH-0101", "0000101", "Doanh thu bán hàng", "131", "511", 15000000, "KH01", "Đã xuất hóa đơn điện tử"]],
       cdsps: [["Số hiệu TK", "Tên tài khoản", "Dư Nợ đầu kỳ", "Dư Có đầu kỳ"], ["111", "Tiền mặt", 50000000, 0], ["112", "Tiền gửi ngân hàng", 150000000, 0], ["156", "Hàng hóa", 26550000, 0], ["411", "Vốn đầu tư của chủ sở hữu", 0, 226550000]],
       tk: [["Mã hàng", "Tên hàng hóa", "ĐVT", "Tồn kho đầu kỳ - Số lượng", "Tồn kho đầu kỳ - Đơn giá", "Tồn kho đầu kỳ - Giá trị"], ["VPP001", "Giấy A4 Double A 70gsm", "Ream", 200, 68000, 13600000]],
@@ -762,18 +841,16 @@
     function applySort(arr, sortObj, errTop) {
       const k = sortObj.k, d = sortObj.d;
       const numK = new Set(["sn", "gn", "gtn", "sx", "px", "gx"]);
+      const getPrio = x => x._retWarn ? 2 : (errTop && x._err ? 1 : 0);
       return [...arr].sort((a, b) => {
-        if (errTop) {
-          const ae = a._err ? 1 : 0, be = b._err ? 1 : 0;
-          if (ae !== be) return be - ae;
-        }
+        const pa = getPrio(a), pb = getPrio(b);
+        if (pa !== pb) return pb - pa;
         if (!k) return 0;
         if (numK.has(k)) return ((a[k] ?? -Infinity) - (b[k] ?? -Infinity)) * d;
         let av = "", bv = "";
         if (k === "ten") { av = (P.find(p => p.ma === a.ma) || {}).ten || ""; bv = (P.find(p => p.ma === b.ma) || {}).ten || ""; }
         else if (k === "dvt") { av = (P.find(p => p.ma === a.ma) || {}).dvt || ""; bv = (P.find(p => p.ma === b.ma) || {}).dvt || ""; }
-        else if (k === "src") { av = a._auto ? "1" : "0"; bv = b._auto ? "1" : "0"; }
-        else if (k === "err") { av = a._err || ""; bv = b._err || ""; }
+        else if (k === "err") { av = [a._err, a._retWarn].filter(Boolean).join("; "); bv = [b._err, b._retWarn].filter(Boolean).join("; "); }
         else { av = String(a[k] ?? ""); bv = String(b[k] ?? ""); }
         return av.localeCompare(bv, "vi") * d;
       });
@@ -959,6 +1036,12 @@
       render();
     }
 
+    function jumpToNegProduct(ma, isVpdd) {
+      if (isVpdd) { vpddQ = ma || ""; tab = "ct_vpdd"; }
+      else { ctQ = ma || ""; tab = "ct"; }
+      render();
+    }
+
     function startEditCdsps(tk, ten, no, co) {
       const ex = tkOpening.find(o => String(o.tk || "").trim() === tk);
       editCdsps = {
@@ -996,15 +1079,21 @@
     }
 
     function addPartner(kind) {
-      editPartner = { kind, origMa: null, draft: { ma: "", ten: "", mst: "", dau: 0 } };
+      editPartner = { kind, origMa: null, draft: { ma: "", ten: "", mst: "", dauNo: 0, dauCo: 0 } };
       render();
     }
 
-    function startEditPartner(kind, ma, ten, mst, dau) {
+    function startEditPartner(kind, ma, ten, mst, dauNo, dauCo) {
       editPartner = {
         kind,
         origMa: ma,
-        draft: { ma, ten: ten === "(chưa có trong danh mục)" ? "" : ten, mst: mst || "", dau: Math.round(dau || 0) }
+        draft: {
+          ma,
+          ten: ten === "(chưa có trong danh mục)" ? "" : ten,
+          mst: mst || "",
+          dauNo: Math.round(Number(dauNo) || 0),
+          dauCo: Math.round(Number(dauCo) || 0)
+        }
       };
       render();
     }
@@ -1015,11 +1104,15 @@
       const A = kind === "kh" ? KH : NCC;
       const cleanMa = String(draft.ma || "").trim();
       if (!cleanMa) { st("Mã đối tượng không được để trống.", 1); render(); return; }
+      const dNo = Math.round(Number(draft.dauNo) || 0);
+      const dCo = Math.round(Number(draft.dauCo) || 0);
       const clean = {
         ma: cleanMa,
         ten: String(draft.ten || "").trim(),
         mst: String(draft.mst || "").trim(),
-        dau: Math.round(Number(draft.dau) || 0)
+        dauNo: dNo,
+        dauCo: dCo,
+        dau: kind === "kh" ? dNo - dCo : dCo - dNo
       };
       const keyMa = origMa !== null ? origMa : cleanMa;
       const idx = A.findIndex(x => x.ma === keyMa);
@@ -1202,18 +1295,20 @@
 
     function getFilteredCt(isVpdd, C, linesSrc) {
       const qVal = isVpdd ? vpddQ : ctQ, per = isVpdd ? vpddPer : ctPer, sortObj = isVpdd ? vpddSort : ctSort;
-      const errTop = isVpdd ? vpddErrTop : ctErrTop, onlyErr = isVpdd ? vpddOnlyErr : ctOnlyErr;
+      const errTop = isVpdd ? vpddErrTop : ctErrTop, onlyErr = isVpdd ? vpddOnlyErr : ctOnlyErr, onlyRet = isVpdd ? vpddOnlyRet : ctOnlyRet;
       const q = qVal.trim().toLowerCase();
       const ls = linesSrc.filter(l => {
         l._err = C.errs.get(l) || "";
+        l._retWarn = C.retWarns.get(l) || "";
         if (onlyErr && !l._err) return false;
+        if (onlyRet && !l._retWarn) return false;
         if (q && !(l.ph + l.ma + l.kh + l.nd + l.no + l.co).toLowerCase().includes(q)) return false;
         return matchesPer(l.ngay, per);
       });
       return applySort(ls, sortObj, errTop);
     }
 
-    function computeTkSummary(isVpdd, C, prodsSrc, linesSrc, qStr = "") {
+    function computeTkSummary(isVpdd, C, prodsSrc, linesSrc, qStr = "", negFirst = true, onlyNeg = false) {
       const per = isVpdd ? ktVpdd : kt;
       const [a, b] = rangeOf(per);
       const actCodes = new Set(linesSrc.map(l => l.ma));
@@ -1224,42 +1319,110 @@
         return true;
       });
       const T = { dS: 0, dG: 0, nS: 0, nG: 0, xS: 0, xG: 0, cS: 0, cG: 0 };
-      const rows = list.map(p => {
+      let negCount = 0;
+      const allRows = list.map(p => {
         const m = C.M[p.ma] || {}, f = m[a];
         let dS = f ? f.dS : 0, dG = f ? f.dG : 0;
         if (!f && C.U === 0) { dS = p.sl; dG = Math.round(p.gt); }
-        else if (!f && a > C.U && m[C.U]) { const z = m[C.U]; dS = Math.max(0, z.dS + z.nS - z.xS); dG = dS === 0 ? 0 : Math.max(0, Math.round(z.dG + z.nG - z.xG)); }
+        else if (!f && a > C.U && m[C.U]) { const z = m[C.U]; dS = z.dS + z.nS - z.xS; dG = dS === 0 ? 0 : Math.round(z.dG + z.nG - z.xG); }
         let nS = 0, nG = 0, xS = 0, xG = 0;
         for (let i = a; i <= b; i++) if (m[i]) { nS += m[i].nS; nG += m[i].nG; xS += m[i].xS; xG += m[i].xG; }
-        const cS = Math.max(0, dS + nS - xS), cG = cS === 0 ? 0 : Math.max(0, Math.round(dG + nG - xG));
-        T.dS += dS; T.dG += dG; T.nS += nS; T.nG += nG; T.xS += xS; T.xG += xG; T.cS += cS; T.cG += cG;
-        return { ma: p.ma, ten: p.ten, dvt: p.dvt, dS, dDG: dS ? Math.round(dG / dS) : 0, dG, nS, nG, xS, xG, cS, cDG: cS ? Math.round(cG / cS) : 0, cG };
+        const cS = dS + nS - xS, cG = cS === 0 ? 0 : Math.round(dG + nG - xG);
+        const isNegative = cS < 0 || cG < 0;
+        if (isNegative) negCount++;
+        return { ma: p.ma, ten: p.ten, dvt: p.dvt, dS, dDG: dS ? Math.round(dG / dS) : 0, dG, nS, nG, xS, xG, cS, cDG: cS ? Math.round(cG / cS) : 0, cG, isNegative };
       });
-      return { a, b, per, list, rows, T };
+      let rows = onlyNeg ? allRows.filter(r => r.isNegative) : allRows;
+      if (negFirst && negCount > 0) {
+        rows = rows.filter(r => r.isNegative).concat(rows.filter(r => !r.isNegative));
+      }
+      rows.forEach(r => { T.dS += r.dS; T.dG += r.dG; T.nS += r.nS; T.nG += r.nG; T.xS += r.xS; T.xG += r.xG; T.cS += r.cS; T.cG += r.cG; });
+      return { a, b, per, list, rows, T, negCount };
     }
 
-    function computePartnerSummary(kind, C, useFilter = false) {
+    function computePartnerSummary(kind, C, useFilter = false, customPer = null) {
       const A = kind === "kh" ? KH : NCC, pre = kind === "kh" ? "131" : "331", ps = new Map();
-      const per = useFilter ? (kind === "kh" ? khPer : nccPer) : { t: "Tất cả", k: 1, y: C.Y };
+      const per = customPer || (useFilter ? (kind === "kh" ? khPer : nccPer) : { t: "Tất cả", k: 1, y: C.Y });
       const q = useFilter ? (kind === "kh" ? khQ : nccQ).trim().toLowerCase() : "";
       const sortObj = useFilter ? (kind === "kh" ? khSort : nccSort) : { k: "", d: 1 };
-      A.forEach(a => ps.set(a.ma, { ...a, n: 0, c: 0, inList: true }));
-      nkG(C).concat(NKX.map(x => ({ l: x, s: x.tien }))).forEach(({ l, s }) => {
-        if (!matchesPer(l.ngay, per)) return;
-        const d = String(l.no).startsWith(pre), c = String(l.co).startsWith(pre);
-        if (!l.kh || (!d && !c)) return;
-        if (!ps.has(l.kh)) ps.set(l.kh, { ma: l.kh, ten: "(chưa có trong danh mục)", mst: "", dau: 0, n: 0, c: 0, inList: false });
-        const o = ps.get(l.kh); if (d) o.n += Math.round(s); if (c) o.c += Math.round(s);
+      A.forEach(a => {
+        const op = getPartnerOpening(a, kind);
+        ps.set(a.ma, { ma: a.ma, ten: a.ten, mst: a.mst, dauNoRaw: op.dauNo, dauCoRaw: op.dauCo, priorNo: 0, priorCo: 0, n: 0, c: 0, inList: true });
       });
-      const T = [0, 0, 0, 0];
-      let rows = [...ps.values()].map(o => ({ ...o, cu: kind === "kh" ? o.dau + o.n - o.c : o.dau + o.c - o.n }));
+      const [rangeStart, rangeEnd] = per.t === "Năm" ? [1, 12] : per.t === "Quý" ? [3 * per.k - 2, 3 * per.k] : per.t === "Tháng" ? [per.k, per.k] : [1, 12];
+      nkG(C).concat(NKX.map(x => ({ l: x, s: x.tien }))).forEach(({ l, s }) => {
+        const d = String(l.no || "").startsWith(pre), c = String(l.co || "").startsWith(pre);
+        if (!l.kh || (!d && !c)) return;
+        let o = ps.get(l.kh);
+        if (!o) {
+          o = { ma: l.kh, ten: "(chưa có trong danh mục)", mst: "", dauNoRaw: 0, dauCoRaw: 0, priorNo: 0, priorCo: 0, n: 0, c: 0, inList: false };
+          ps.set(l.kh, o);
+        }
+        const amt = Math.round(s || 0);
+        if (per.t === "Tất cả") {
+          if (d) o.n += amt; if (c) o.c += amt;
+          return;
+        }
+        const info = mqyInfo(l.ngay);
+        if (!info || info.y !== (per.y || C.Y)) return;
+        if (info.m < rangeStart) {
+          if (d) o.priorNo += amt; if (c) o.priorCo += amt;
+        } else if (info.m <= rangeEnd) {
+          if (d) o.n += amt; if (c) o.c += amt;
+        }
+      });
+      const T = { dauNo: 0, dauCo: 0, n: 0, c: 0, cuNo: 0, cuCo: 0 };
+      let rows = [...ps.values()];
       if (q) rows = rows.filter(o => (o.ma + " " + o.ten + " " + o.mst).toLowerCase().includes(q));
+      rows = rows.map(o => {
+        let dauNo = o.dauNoRaw, dauCo = o.dauCoRaw;
+        if (per.t !== "Tất cả" && rangeStart > 1) {
+          const netOp = o.dauNoRaw - o.dauCoRaw + o.priorNo - o.priorCo;
+          dauNo = netOp > 0 ? netOp : 0; dauCo = netOp < 0 ? -netOp : 0;
+        }
+        const netEnd = dauNo - dauCo + o.n - o.c;
+        const cuNo = netEnd > 0 ? netEnd : 0, cuCo = netEnd < 0 ? -netEnd : 0;
+        T.dauNo += dauNo; T.dauCo += dauCo; T.n += o.n; T.c += o.c; T.cuNo += cuNo; T.cuCo += cuCo;
+        return { ma: o.ma, ten: o.ten, mst: o.mst, dauNo, dauCo, n: o.n, c: o.c, cuNo, cuCo, inList: o.inList };
+      });
       if (sortObj.k) {
         const k = sortObj.k, d = sortObj.d;
-        rows.sort((a, b) => (k === "dau" || k === "n" || k === "c" || k === "cu") ? ((a[k] - b[k]) * d) : String(a[k] ?? "").localeCompare(String(b[k] ?? ""), "vi") * d);
+        rows.sort((a, b) => (k === "dauNo" || k === "dauCo" || k === "n" || k === "c" || k === "cuNo" || k === "cuCo") ? ((a[k] - b[k]) * d) : String(a[k] ?? "").localeCompare(String(b[k] ?? ""), "vi") * d);
       }
-      rows.forEach(o => { T[0] += o.dau; T[1] += o.n; T[2] += o.c; T[3] += o.cu; });
       return { rows, T };
+    }
+
+    function computeCdspsReconcile(C, cdspsRows, per) {
+      const p = { ...per, y: C.Y };
+      const khRes = computePartnerSummary("kh", C, false, p);
+      const nccRes = computePartnerSummary("ncc", C, false, p);
+      let c131DNo = 0, c131DCo = 0, c131PNo = 0, c131PCo = 0, c131CNo = 0, c131CCo = 0;
+      let c331DNo = 0, c331DCo = 0, c331PNo = 0, c331PCo = 0, c331CNo = 0, c331CCo = 0;
+      cdspsRows.forEach(r => {
+        if (r.tk.startsWith("131")) {
+          c131DNo += r.dNo; c131DCo += r.dCo; c131PNo += r.pNo; c131PCo += r.pCo; c131CNo += r.cNo; c131CCo += r.cCo;
+        } else if (r.tk.startsWith("331")) {
+          c331DNo += r.dNo; c331DCo += r.dCo; c331PNo += r.pNo; c331PCo += r.pCo; c331CNo += r.cNo; c331CCo += r.cCo;
+        }
+      });
+      const cdsps131OpenNet = c131DNo - c131DCo, cdsps131EndNet = c131CNo - c131CCo;
+      const khOpenNet = khRes.T.dauNo - khRes.T.dauCo, khEndNet = khRes.T.cuNo - khRes.T.cuCo;
+      const khOpenDiff = cdsps131OpenNet - khOpenNet, khEndDiff = cdsps131EndNet - khEndNet;
+      const khPNoDiff = c131PNo - khRes.T.n, khPCoDiff = c131PCo - khRes.T.c;
+      const has131Mismatch = khOpenDiff !== 0 || khEndDiff !== 0 || khPNoDiff !== 0 || khPCoDiff !== 0;
+
+      const cdsps331OpenNet = c331DCo - c331DNo, cdsps331EndNet = c331CCo - c331CNo;
+      const nccOpenNet = nccRes.T.dauCo - nccRes.T.dauNo, nccEndNet = nccRes.T.cuCo - nccRes.T.cuNo;
+      const nccOpenDiff = cdsps331OpenNet - nccOpenNet, nccEndDiff = cdsps331EndNet - nccEndNet;
+      const nccPNoDiff = c331PNo - nccRes.T.n, nccPCoDiff = c331PCo - nccRes.T.c;
+      const has331Mismatch = nccOpenDiff !== 0 || nccEndDiff !== 0 || nccPNoDiff !== 0 || nccPCoDiff !== 0;
+
+      return {
+        hasError: has131Mismatch || has331Mismatch,
+        errorCount: (has131Mismatch ? 1 : 0) + (has331Mismatch ? 1 : 0),
+        ar131: { hasMismatch: has131Mismatch, cdspsOpenNet: cdsps131OpenNet, cdspsEndNet: cdsps131EndNet, khOpenNet, khEndNet, openDiff: khOpenDiff, endDiff: khEndDiff, pNoDiff: khPNoDiff, pCoDiff: khPCoDiff },
+        ap331: { hasMismatch: has331Mismatch, cdspsOpenNet: cdsps331OpenNet, cdspsEndNet: cdsps331EndNet, nccOpenNet, nccEndNet, openDiff: nccOpenDiff, endDiff: nccEndDiff, pNoDiff: nccPNoDiff, pCoDiff: nccPCoDiff }
+      };
     }
 
     function buildDmAoa(Y) {
@@ -1278,7 +1441,7 @@
     }
 
     function buildTkAoa(isVpdd, C, prodsSrc, linesSrc) {
-      const d = computeTkSummary(isVpdd, C, prodsSrc, linesSrc, isVpdd ? tkVpQ : tkQ);
+      const d = computeTkSummary(isVpdd, C, prodsSrc, linesSrc, isVpdd ? tkVpQ : tkQ, isVpdd ? tkVpNegTop : tkNegTop, false);
       const lbl = d.per.t === "Năm" ? `Năm ${C.Y}` : `${d.per.t} ${d.per.k}/${C.Y}`;
       return [
         [isVpdd ? `TỔNG HỢP TỒN KHO VPĐD (TK 1368) - ${lbl}` : `TỔNG HỢP NHẬP - XUẤT - TỒN KHO - ${lbl}`], [],
@@ -1294,17 +1457,17 @@
       const body = ls.map(l => {
         const p = prodsSrc.find(x => x.ma === l.ma) || {};
         sSN += l.sn || 0; sGN += l.gtn || 0; sSX += l.sx || 0; sGX += l.gx || 0;
+        const chk = [l._err, l._retWarn].filter(Boolean).join("; ");
         return [
-          ...(isVpdd ? [l._auto ? "Copy 1368/156" : "Import VPĐD"] : []),
           l.ph, dr(l.ngay), l.hd, l.kh, l.no, l.co, l.nd, l.ma, p.ten || "", p.dvt || "",
-          l.sn ?? "", l.gn ?? "", l.gtn ?? "", l.sx ?? "", l.px ?? "", l.gx != null ? l.gx : "", l._err || ""
+          l.sn ?? "", l.gn ?? "", l.gtn ?? "", l.sx ?? "", l.px ?? "", l.gx != null ? l.gx : "", chk
         ];
       });
       return [
         [isVpdd ? `XUẤT NHẬP KHO VPĐD (TK 1368) - NĂM ${C.Y}` : `XUẤT NHẬP KHO CÔNG TY - NĂM ${C.Y}`], [],
-        [...(isVpdd ? ["Nguồn"] : []), "Mã phiếu", "Ngày", "Số HĐ", "KH/NCC", "TK Nợ", "TK Có", "Nội dung", "Mã hàng", "Tên hàng", "ĐVT", "Nhập SL", "Nhập ĐG", "Nhập GT", "Xuất SL", "Xuất ĐG", "Xuất GT", "Kiểm tra"],
+        ["Mã phiếu", "Ngày", "Số HĐ", "KH/NCC", "TK Nợ", "TK Có", "Nội dung", "Mã hàng", "Tên hàng", "ĐVT", "Nhập SL", "Nhập ĐG", "Nhập GT", "Xuất SL", "Xuất ĐG", "Xuất GT", "Kiểm tra"],
         ...body,
-        [...(isVpdd ? [""] : []), "", "", "", "", "", "", `CỘNG (${ls.length} dòng)`, "", "", "", sSN, "", sGN, sSX, "", sGX, ""]
+        ["", "", "", "", "", "", `CỘNG (${ls.length} dòng)`, "", "", "", sSN, "", sGN, sSX, "", sGX, ""]
       ];
     }
 
@@ -1323,9 +1486,9 @@
       const isKh = kind === "kh", d = computePartnerSummary(kind, C, filtered);
       return [
         [isKh ? `CÔNG NỢ PHẢI THU KHÁCH HÀNG - NĂM ${C.Y}` : `CÔNG NỢ PHẢI TRẢ NHÀ CUNG CẤP - NĂM ${C.Y}`], [],
-        [isKh ? "Mã KH" : "Mã NCC", isKh ? "Thông tin khách hàng" : "Thông tin nhà cung cấp", "MST", "Đầu kỳ", "Phát sinh Nợ", "Phát sinh Có", "Cuối kỳ"],
-        ...d.rows.map(o => [o.ma, o.ten, o.mst, o.dau, o.n, o.c, o.cu]),
-        ["", `TỔNG CỘNG (${d.rows.length})`, "", d.T[0], d.T[1], d.T[2], d.T[3]]
+        [isKh ? "Mã KH" : "Mã NCC", isKh ? "Thông tin khách hàng" : "Thông tin nhà cung cấp", "MST", "Dư Nợ đầu kỳ", "Dư Có đầu kỳ", "Phát sinh Nợ", "Phát sinh Có", "Dư Nợ cuối kỳ", "Dư Có cuối kỳ"],
+        ...d.rows.map(o => [o.ma, o.ten, o.mst, o.dauNo, o.dauCo, o.n, o.c, o.cuNo, o.cuCo]),
+        ["", `TỔNG CỘNG (${d.rows.length})`, "", d.T.dauNo, d.T.dauCo, d.T.n, d.T.c, d.T.cuNo, d.T.cuCo]
       ];
     }
 
@@ -1424,6 +1587,18 @@
       </div></div>`;
     }
 
+    function splitLedgerBalance(net, activeTk, allowNeg) {
+      if (allowNeg) {
+        const isTwoSided = activeTk.startsWith("131") || activeTk.startsWith("331") || activeTk.startsWith("138") || activeTk.startsWith("338") || activeTk.startsWith("421");
+        if (!isTwoSided) {
+          const d0 = activeTk.charAt(0);
+          if (d0 === "3" || d0 === "4" || d0 === "5" || d0 === "7") return { duNo: 0, duCo: -net };
+          return { duNo: net, duCo: 0 };
+        }
+      }
+      return { duNo: net > 0 ? net : 0, duCo: net < 0 ? -net : 0 };
+    }
+
     function buildSoCaiContext(C) {
       const nkRows = buildNkRows(C);
       const cat = cdspsCir === "TT99" ? ACCOUNTS_TT99 : ACCOUNTS_TT200;
@@ -1460,12 +1635,13 @@
         }
       });
       const netOp = opNo + prNo - (opCo + prCo);
-      const startNo = netOp > 0 ? netOp : 0, startCo = netOp < 0 ? -netOp : 0;
+      const openBal = splitLedgerBalance(netOp, activeTk, soCaiAllowNeg);
       const netEnd = netOp + totNo - totCo;
+      const endBal = splitLedgerBalance(netEnd, activeTk, soCaiAllowNeg);
       return {
         sortedTks, activeTk, tkName: nameMap.get(activeTk) || "", a, b,
-        startNo, startCo, totNo, totCo, ytdNo, ytdCo,
-        endNo: netEnd > 0 ? netEnd : 0, endCo: netEnd < 0 ? -netEnd : 0, entries
+        startNo: openBal.duNo, startCo: openBal.duCo, totNo, totCo, ytdNo, ytdCo,
+        endNo: endBal.duNo, endCo: endBal.duCo, entries
       };
     }
 
@@ -1508,7 +1684,7 @@
         }
       });
       const netOp = opNo + prNo - (opCo + prCo);
-      const startNo = netOp > 0 ? netOp : 0, startCo = netOp < 0 ? -netOp : 0;
+      const openBal = splitLedgerBalance(netOp, activeTk, s38AllowNeg);
       let runNet = netOp, totNo = 0, totCo = 0;
       const entries = [];
       nkRows.forEach(r => {
@@ -1521,9 +1697,11 @@
         const doiUng = d && c ? `${r.co}/${r.no}` : d ? r.co : r.no;
         totNo += psNo; totCo += psCo;
         runNet = runNet + psNo - psCo;
-        entries.push({ ngay: r.ngay, ph: r.ph, nd: r.nd, doiUng, psNo, psCo, duNo: runNet > 0 ? runNet : 0, duCo: runNet < 0 ? -runNet : 0, gc: r.gc || "" });
+        const bal = splitLedgerBalance(runNet, activeTk, s38AllowNeg);
+        entries.push({ ngay: r.ngay, ph: r.ph, nd: r.nd, doiUng, psNo, psCo, duNo: bal.duNo, duCo: bal.duCo, gc: r.gc || "" });
       });
-      return { sortedTks, activeTk, tkName: nameMap.get(activeTk) || "", a, b, startNo, startCo, totNo, totCo, endNo: runNet > 0 ? runNet : 0, endCo: runNet < 0 ? -runNet : 0, entries };
+      const endBal = splitLedgerBalance(runNet, activeTk, s38AllowNeg);
+      return { sortedTks, activeTk, tkName: nameMap.get(activeTk) || "", a, b, startNo: openBal.duNo, startCo: openBal.duCo, totNo, totCo, endNo: endBal.duNo, endCo: endBal.duCo, entries };
     }
 
     function expS38(C) {
@@ -1549,7 +1727,6 @@
     function renderCtEditRow(d, isVpdd) {
       return `<tr style="background:var(--warn)">
         <td class="noprint"><button style="padding:2px 6px" onclick="saveEditLine()">Lưu</button> <button class="s" style="padding:2px 6px" onclick="editLine=null;render()">Hủy</button></td>
-        ${isVpdd ? `<td>${editLine.isNew ? "Thêm mới" : "Import VPĐD"}</td>` : ""}
         <td><input data-ed="ph" value="${esc(d.ph)}" style="width:90px"></td>
         <td><input type="date" data-ed="ngay" value="${esc(d.ngay)}"></td>
         <td><input data-ed="hd" value="${esc(d.hd)}" style="width:76px"></td>
@@ -1570,31 +1747,34 @@
 
     function renderCtView(isVpdd, C, linesSrc, prodsSrc) {
       const qVal = isVpdd ? vpddQ : ctQ, per = isVpdd ? vpddPer : ctPer, sortObj = isVpdd ? vpddSort : ctSort;
-      const errTop = isVpdd ? vpddErrTop : ctErrTop, onlyErr = isVpdd ? vpddOnlyErr : ctOnlyErr;
+      const errTop = isVpdd ? vpddErrTop : ctErrTop, onlyErr = isVpdd ? vpddOnlyErr : ctOnlyErr, onlyRet = isVpdd ? vpddOnlyRet : ctOnlyRet;
       const q = qVal.trim().toLowerCase();
       const ls = getFilteredCt(isVpdd, C, linesSrc);
 
       let sSN = 0, sGN = 0, sSX = 0, sGX = 0;
       const newRowHtml = (editLine && editLine.isVp === isVpdd && editLine.isNew) ? renderCtEditRow(editLine.draft, isVpdd) : "";
       const rows = ls.slice(0, 800).map(l => {
-        const p = prodsSrc.find(x => x.ma === l.ma) || {}, e = l._err, gxVal = l.gx != null ? l.gx : "";
+        const p = prodsSrc.find(x => x.ma === l.ma) || {}, e = l._err, rw = l._retWarn, gxVal = l.gx != null ? l.gx : "";
         sSN += l.sn || 0; sGN += l.gtn || 0; sSX += l.sx || 0; sGX += l.gx || 0;
 
         if (editLine && !editLine.isNew && editLine.isVp === isVpdd && editLine.draft.id === l.id && !l._auto) {
           return renderCtEditRow(editLine.draft, isVpdd);
         }
 
-        const rowCls = e ? "er" : (!isVpdd && isBranch1368(l) ? "br" : "");
+        const rowCls = rw ? "ret" : e ? "er" : (l._isRet ? "ret-ok" : (!isVpdd && isBranch1368(l) ? "br" : ""));
         const editCell = !l._auto
           ? `<button class="${e ? "d" : "s"}" style="padding:2px 6px" onclick="event.stopPropagation();startEditLine('${esc(l.id)}',${isVpdd})">Sửa</button> <button class="s" style="padding:2px 6px;color:#dc2626" onclick="event.stopPropagation();delInvLine('${esc(l.id)}',${isVpdd})" title="Xóa dòng">Xóa</button>`
           : `<span class="m">Auto</span>`;
         const quickAdd = (e === "Mã hàng chưa có trong danh mục" && String(l.ma || "").trim())
           ? ` <button class="noprint" style="padding:1px 6px;font-size:11px" onclick="event.stopPropagation();quickAddProduct('${esc(l.ma)}')">+ Thêm vào DM</button>` : "";
-        return `<tr class="${rowCls}" ${!l._auto ? `data-edit-ct="${esc(l.id)}" data-vp="${isVpdd ? 1 : 0}" style="cursor:pointer" title="Click vào dòng để sửa"` : ""}><td class="noprint">${editCell}</td>${isVpdd ? `<td>${l._auto ? "Copy 1368/156" : "Import VPĐD"}</td>` : ""}<td>${esc(l.ph)}</td><td>${dr(l.ngay)}</td><td>${esc(l.hd)}</td><td>${esc(l.kh)}</td><td>${esc(l.no)}</td><td>${esc(l.co)}</td><td>${esc(l.nd)}</td><td>${esc(l.ma)}</td><td>${esc(p.ten)}</td><td>${esc(p.dvt)}</td><td class=n>${fmt(l.sn)}</td><td class=n>${fmt(l.gn)}</td><td class=n>${fmt(l.gtn)}</td><td class=n>${fmt(l.sx)}</td><td class=n>${l.px == null ? "" : fmt(l.px)}</td><td class=n>${fmt(gxVal)}</td><td>${esc(e)}${quickAdd}</td></tr>`;
+        const retAct = rw
+          ? ` <button class="noprint" style="padding:1px 6px;font-size:11px;background:#0284c7;border-color:#0284c7" onclick="event.stopPropagation();startEditLine('${esc(l.id)}',${isVpdd})">Nhập giá</button>`
+          : (!e && l._isRet ? ` <span style="color:#0369a1;font-size:13px">Hàng khách trả lại</span>` : "");
+        const checkHtml = `${e ? `<span>${esc(e)}</span>` : ""}${quickAdd}${rw ? `${e ? " · " : ""}<b>${esc(rw)}</b>` : ""}${retAct}`;
+        return `<tr class="${rowCls}" ${!l._auto ? `data-edit-ct="${esc(l.id)}" data-vp="${isVpdd ? 1 : 0}" style="cursor:pointer" title="Click vào dòng để sửa"` : ""}><td class="noprint">${editCell}</td><td>${esc(l.ph)}</td><td>${dr(l.ngay)}</td><td>${esc(l.hd)}</td><td>${esc(l.kh)}</td><td>${esc(l.no)}</td><td>${esc(l.co)}</td><td>${esc(l.nd)}</td><td>${esc(l.ma)}</td><td>${esc(p.ten)}</td><td>${esc(p.dvt)}</td><td class=n>${fmt(l.sn)}</td><td class=n>${fmt(l.gn)}</td><td class=n>${fmt(l.gtn)}</td><td class=n>${fmt(l.sx)}</td><td class=n>${l.px == null ? "" : fmt(l.px)}</td><td class=n>${fmt(gxVal)}</td><td>${checkHtml}</td></tr>`;
       }).join("");
 
       const cols = [
-        ...(isVpdd ? [["src", "Nguồn", 0]] : []),
         ["ph", "Mã phiếu", 0], ["ngay", "Ngày", 0], ["hd", "Số HĐ", 0], ["kh", "KH/NCC", 0],
         ["no", "Nợ", 0], ["co", "Có", 0], ["nd", "Nội dung", 0], ["ma", "Mã hàng", 0],
         ["ten", "Tên hàng", 0], ["dvt", "ĐVT", 0],
@@ -1608,7 +1788,10 @@
 
       const ps = (q || per.t !== "Tất cả") ? [...new Set(ls.map(l => l.ph))].filter(Boolean).slice(0, 50) : [];
       const pfx = isVpdd ? "vp" : "ct";
-      const ec = C.errs.size;
+      const ec = C.errs.size, rc = C.retWarns.size;
+      const retBanner = rc > 0
+        ? `<div class="st bl noprint"><span><b>Yêu cầu nhập giá cho hàng hóa khách hàng trả lại</b> — Có <b>${rc}</b> dòng phiếu xuất âm số lượng chưa có đơn giá (tô xanh, đẩy lên đầu bảng).</span><button class="s" style="padding:2px 8px" onclick="${isVpdd ? "vpddOnlyRet=!vpddOnlyRet" : "ctOnlyRet=!ctOnlyRet"};render()">${onlyRet ? "Hiện tất cả dòng" : "Chỉ xem dòng trả hàng"}</button></div>`
+        : "";
       return `<datalist id="dmList">${P.map(p => `<option value="${esc(p.ma)}">${esc(p.ten)}</option>`).join("")}</datalist>
               <div class="bar">${upl(isVpdd ? "ct_vpdd" : "ct")}<button class="s" onclick="tpl('${isVpdd ? "ct_vpdd" : "ct"}')">📄 Tải file mẫu</button>
               <button onclick="addInvLine(${isVpdd})">+ Thêm dòng</button>
@@ -1621,15 +1804,18 @@
               ${per.t !== "Tất cả" ? `<input id="${pfx}Py" type="number" value="${per.y}">` : ""}
               <button class="s" onclick="prn(${isVpdd})">🖨 In phiếu</button>
               <label style="margin-left:auto"><input id="${pfx}ErrTop" type="checkbox" ${errTop ? "checked" : ""}> Đẩy lỗi lên đầu</label>
+              ${rc > 0 ? `<button id="${pfx}OnlyRet" class="s ret-btn ${onlyRet ? "on" : ""}" title="Bấm để lọc riêng phiếu trả hàng chưa nhập giá">${onlyRet ? `Đang lọc ${rc} trả hàng (Tắt)` : `↩ ${rc} trả hàng cần giá`}</button>` : ""}
               <button id="${pfx}OnlyErr" class="s err-btn ${onlyErr ? "on" : ""}" title="Bấm để lọc riêng các dòng lỗi">${onlyErr ? `Đang lọc ${ec} lỗi (Tắt)` : `⚠ ${ec} lỗi`}</button>
               <span class="m">${ls.length}/${linesSrc.length} dòng</span></div>
-              <div class="w"><table><thead>${thHtml}</thead><tbody>${newRowHtml}${rows}</tbody><tfoot><tr><td class="noprint"></td><td colspan=${isVpdd ? 11 : 10}>CỘNG KỲ ĐANG LỌC (${ls.length} dòng)</td><td class=n>${fmt(sSN)}</td><td></td><td class=n>${fmt(sGN)}</td><td class=n>${fmt(sSX)}</td><td></td><td class=n>${fmt(sGX)}</td><td></td></tr></tfoot></table></div>
+              ${retBanner}
+              <div class="w"><table><thead>${thHtml}</thead><tbody>${newRowHtml}${rows}</tbody><tfoot><tr><td class="noprint"></td><td colspan=10>CỘNG KỲ ĐANG LỌC (${ls.length} dòng)</td><td class=n>${fmt(sSN)}</td><td></td><td class=n>${fmt(sGN)}</td><td class=n>${fmt(sSX)}</td><td></td><td class=n>${fmt(sGX)}</td><td></td></tr></tfoot></table></div>
               <div class="pvs">${ps.map(x => vch(x, linesSrc, prodsSrc)).join("")}</div>`;
     }
 
     function renderTkView(isVpdd, C, prodsSrc, linesSrc) {
       const qVal = isVpdd ? tkVpQ : tkQ;
-      const { a, b, per, list, rows: sumRows, T } = computeTkSummary(isVpdd, C, prodsSrc, linesSrc, qVal);
+      const negTop = isVpdd ? tkVpNegTop : tkNegTop, onlyNeg = isVpdd ? tkVpOnlyNeg : tkOnlyNeg;
+      const { a, b, per, list, rows: sumRows, T, negCount } = computeTkSummary(isVpdd, C, prodsSrc, linesSrc, qVal, negTop, onlyNeg);
       let sel = isVpdd ? scVpddMa : scMa;
       if (!sel && list[0]) { sel = list[0].ma; if (isVpdd) scVpddMa = sel; else scMa = sel; }
 
@@ -1643,15 +1829,19 @@
             <td class=n>${fmt(editTk.sl ? Math.round(editTk.gt / editTk.sl) : 0)}</td>
             <td><input type="number" data-etk="gt" value="${editTk.gt}" style="width:104px;text-align:right"></td>
             <td class=n>${fmt(r.nS)}</td><td class=n>${fmt(r.nG)}</td><td class=n>${fmt(r.xS)}</td><td class=n>${fmt(r.xG)}</td>
-            <td class=n>${fmt(r.cS)}</td><td class=n>${fmt(r.cDG)}</td><td class=n>${fmt(r.cG)}</td>
+            <td class="n${r.cS < 0 ? " neg" : ""}">${fmt(r.cS)}</td><td class=n>${fmt(r.cDG)}</td><td class="n${r.cG < 0 ? " neg" : ""}">${fmt(r.cG)}</td>
             <td class="noprint"><button style="padding:2px 6px" onclick="event.stopPropagation();saveTk()">Lưu</button> <button class="s" style="padding:2px 6px" onclick="event.stopPropagation();editTk=null;render()">Hủy</button></td></tr>`;
         }
-        return `<tr class="${sel === r.ma ? "sel" : ""}" data-row-ma="${esc(r.ma)}" data-vp="${isVpdd ? 1 : 0}" style="cursor:pointer"><td>${esc(r.ma)}</td><td>${esc(r.ten)}</td><td>${esc(r.dvt)}</td><td class=n>${fmt(r.dS)}</td><td class=n>${fmt(r.dDG)}</td><td class=n>${fmt(r.dG)}</td><td class=n>${fmt(r.nS)}</td><td class=n>${fmt(r.nG)}</td><td class=n>${fmt(r.xS)}</td><td class=n>${fmt(r.xG)}</td><td class=n>${fmt(r.cS)}</td><td class=n>${fmt(r.cDG)}</td><td class=n>${fmt(r.cG)}</td><td class="noprint"><button class="s" style="padding:2px 6px" onclick="event.stopPropagation();openSc(false,'${esc(r.ma)}',${isVpdd})">S10-DN</button> <button class="s" style="padding:2px 6px" onclick="event.stopPropagation();startEditTk('${esc(r.ma)}',${isVpdd})">Sửa</button> <button class="s" style="padding:2px 6px;color:#dc2626" onclick="event.stopPropagation();delTkOpening('${esc(r.ma)}',${isVpdd})">Xóa</button></td></tr>`;
+        const rowCls = r.isNegative ? "er" : (sel === r.ma ? "sel" : "");
+        const negBadge = r.isNegative ? ` <span style="font-size:11px;font-weight:700;padding:1px 5px;border-radius:4px;background:#dc2626;color:#fff">Tồn âm</span>` : "";
+        const ktBtn = r.isNegative ? ` <button class="d" style="padding:2px 6px" onclick="event.stopPropagation();jumpToNegProduct('${esc(r.ma)}',${isVpdd})" title="Kiểm tra chi tiết Xuất Nhập kho mã hàng này">KT XNK</button>` : "";
+        return `<tr class="${rowCls}" data-row-ma="${esc(r.ma)}" data-vp="${isVpdd ? 1 : 0}" style="cursor:pointer"><td><b>${esc(r.ma)}</b>${negBadge}</td><td>${esc(r.ten)}</td><td>${esc(r.dvt)}</td><td class=n>${fmt(r.dS)}</td><td class=n>${fmt(r.dDG)}</td><td class=n>${fmt(r.dG)}</td><td class=n>${fmt(r.nS)}</td><td class=n>${fmt(r.nG)}</td><td class=n>${fmt(r.xS)}</td><td class=n>${fmt(r.xG)}</td><td class="n${r.cS < 0 ? " neg" : ""}">${fmt(r.cS)}</td><td class=n>${fmt(r.cDG)}</td><td class="n${r.cG < 0 ? " neg" : ""}">${fmt(r.cG)}</td><td class="noprint">${ktBtn}<button class="s" style="padding:2px 6px" onclick="event.stopPropagation();openSc(false,'${esc(r.ma)}',${isVpdd})">S10-DN</button> <button class="s" style="padding:2px 6px" onclick="event.stopPropagation();startEditTk('${esc(r.ma)}',${isVpdd})">Sửa</button> <button class="s" style="padding:2px 6px;color:#dc2626" onclick="event.stopPropagation();delTkOpening('${esc(r.ma)}',${isVpdd})">Xóa</button></td></tr>`;
       }).join("");
 
       const title = isVpdd
         ? `TỔNG HỢP TỒN KHO VPĐD (TK 1368), ${per.t.toUpperCase()} ${per.t === "Năm" ? "" : per.k + "/"}${C.Y}`
         : `TỔNG HỢP NHẬP - XUẤT - TỒN KHO, ${per.t.toUpperCase()} ${per.t === "Năm" ? "" : per.k + "/"}${C.Y}`;
+      const pfx = isVpdd ? "tkVp" : "tk";
 
       return `${coHead()}
               <div class="bar noprint">${upl(isVpdd ? "tk_vpdd" : "dm")}<button class="s" onclick="tpl('${isVpdd ? "tk_vpdd" : "tk"}')">📄 Tải file mẫu</button>
@@ -1663,11 +1853,14 @@
               <select id="sp" data-vp="${isVpdd ? 1 : 0}">${list.map(p => `<option value="${esc(p.ma)}" ${p.ma === sel ? "selected" : ""}>${esc(p.ma)} - ${esc(p.ten)}</option>`).join("")}</select>
               <button onclick="openSc(false,'',${isVpdd})">📒 In S10-DN (${esc(sel)})</button>
               <button class="s" onclick="openSc(true,'',${isVpdd})">In sổ tất cả</button>
-              ${isVpdd ? `<label><input id="vpAll" type="checkbox" ${vpddShowAll ? "checked" : ""}> Hiện cả mã chưa PS</label>` : ""}</div>
+              ${isVpdd ? `<label><input id="vpAll" type="checkbox" ${vpddShowAll ? "checked" : ""}> Hiện cả mã chưa PS</label>` : ""}
+              <label style="margin-left:auto"><input id="${pfx}NegTop" type="checkbox" ${negTop ? "checked" : ""}> Đẩy tồn âm lên đầu</label>
+              ${negCount > 0 ? `<button id="${pfx}OnlyNeg" class="s err-btn ${onlyNeg ? "on" : ""}">${onlyNeg ? `Đang lọc ${negCount} tồn âm (Tắt)` : `⚠ ${negCount} tồn âm`}</button>` : ""}</div>
+              ${negCount > 0 ? `<div class="st er noprint"><span><b>Lỗi: Có ${negCount} mặt hàng tồn cuối âm!</b> Yêu cầu kiểm tra chi tiết Xuất Nhập kho (đã tô đỏ và đẩy lên đầu bảng).</span><button class="s" style="padding:2px 8px" onclick="${isVpdd ? "tkVpOnlyNeg=!tkVpOnlyNeg" : "tkOnlyNeg=!tkOnlyNeg"};render()">${onlyNeg ? "Hiện tất cả mặt hàng" : "Chỉ xem hàng tồn âm"}</button></div>` : ""}
               ${b > C.U ? `<div class="st er">Kỳ này có tháng chưa tính giá (đã tính đến tháng ${C.U}).</div>` : ""}
               <h3 style="margin:0">${title}</h3>
               <div class="w"><table><thead>${th(["Mã hàng", "Tên hàng hóa", "ĐVT", "Đầu SL", "Đầu ĐG", "Đầu GT", "Nhập SL", "Nhập GT", "Xuất SL", "Xuất GT", "Cuối SL", "Cuối ĐG", "Cuối GT", "Thao tác"], [3, 4, 5, 6, 7, 8, 9, 10, 11, 12])}
-              <tr class="tt"><td colspan=3>TỔNG CỘNG (${list.length} mã)</td><td class=n>${fmt(T.dS)}</td><td></td><td class=n>${fmt(T.dG)}</td><td class=n>${fmt(T.nS)}</td><td class=n>${fmt(T.nG)}</td><td class=n>${fmt(T.xS)}</td><td class=n>${fmt(T.xG)}</td><td class=n>${fmt(T.cS)}</td><td></td><td class=n>${fmt(T.cG)}</td><td class="noprint"></td></tr></thead>
+              <tr class="tt"><td colspan=3>TỔNG CỘNG (${sumRows.length} mã)</td><td class=n>${fmt(T.dS)}</td><td></td><td class=n>${fmt(T.dG)}</td><td class=n>${fmt(T.nS)}</td><td class=n>${fmt(T.nG)}</td><td class=n>${fmt(T.xS)}</td><td class=n>${fmt(T.xG)}</td><td class="n${T.cS < 0 ? " neg" : ""}">${fmt(T.cS)}</td><td></td><td class="n${T.cG < 0 ? " neg" : ""}">${fmt(T.cG)}</td><td class="noprint"></td></tr></thead>
               <tbody>${rows}</tbody></table></div>`;
     }
 
@@ -1757,13 +1950,20 @@
       } else if (tab === "cdsps") {
         const nkRows = buildNkRows(C);
         const { rows, tot } = buildCdsps(cdspsCir, nkRows, C.Y, cdspsPer);
+        const rec = computeCdspsReconcile(C, rows, cdspsPer);
         const perLbl = cdspsPer.t === "Năm" ? `NĂM ${C.Y}` : cdspsPer.t === "Quý" ? `QUÝ ${cdspsPer.k}/${C.Y}` : `THÁNG ${String(cdspsPer.k).padStart(2, "0")}/${C.Y}`;
         const cirNote = cdspsCir === "TT99" ? "(Kèm theo Thông tư số 99/2025/TT-BTC ngày 27/10/2025)" : "(Ban hành theo Thông tư số 200/2014/TT-BTC ngày 22/12/2014)";
         const openTkSet = new Set(tkOpening.map(o => String(o.tk || "").trim()));
         const cdq = cdQ.trim().toLowerCase();
-        const tbodyHtml = rows.filter(r => (!cdspsHideZero || r.hasAny) && (!cdq || (r.tk + " " + r.ten).toLowerCase().includes(cdq))).map(r => {
+        const tbodyHtml = rows.filter(r => {
+          const forceErr = (rec.ar131.hasMismatch && r.tk.startsWith("131")) || (rec.ap331.hasMismatch && r.tk.startsWith("331"));
+          return (!cdspsHideZero || r.hasAny || forceErr) && (!cdq || (r.tk + " " + r.ten).toLowerCase().includes(cdq));
+        }).map(r => {
           const hidePrn = cdspsHideNoPer ? !r.hasPer : !r.hasAny;
           const isSel = selTk === r.tk;
+          const isMis131 = rec.ar131.hasMismatch && r.tk.startsWith("131");
+          const isMis331 = rec.ap331.hasMismatch && r.tk.startsWith("331");
+          const isMismatch = isMis131 || isMis331;
           if (editCdsps && editCdsps.tk === r.tk) {
             return `<tr style="background:var(--warn)">
               <td><b>${esc(r.tk)}</b></td>
@@ -1775,13 +1975,25 @@
               <td class="noprint"><button style="padding:2px 6px" onclick="event.stopPropagation();saveCdspsOpening()">Lưu</button> <button class="s" style="padding:2px 6px" onclick="event.stopPropagation();editCdsps=null;render()">Hủy</button></td></tr>`;
           }
           const hasOp = openTkSet.has(r.tk);
-          return `<tr class="${isSel ? "sel" : ""} ${hidePrn ? "hide-prn" : ""}" data-tk="${esc(r.tk)}" style="cursor:pointer;${!r.hasAny ? "opacity:.55" : ""}">
-            <td><b>${esc(r.tk)}</b></td><td>${esc(r.ten)}</td>
+          const misTag = isMis131 ? ` <span style="font-size:11px;font-weight:700;padding:1px 5px;border-radius:4px;background:#dc2626;color:#fff">Lỗi lệch DM KH</span>` : (isMis331 ? ` <span style="font-size:11px;font-weight:700;padding:1px 5px;border-radius:4px;background:#dc2626;color:#fff">Lỗi lệch DM NCC</span>` : "");
+          return `<tr class="${isMismatch ? "er" : (isSel ? "sel" : "")} ${hidePrn ? "hide-prn" : ""}" data-tk="${esc(r.tk)}" style="cursor:pointer;${!r.hasAny && !isMismatch ? "opacity:.55" : ""}">
+            <td><b>${esc(r.tk)}</b></td><td>${esc(r.ten)}${misTag}</td>
             <td class=n>${r.dNo ? fmt(r.dNo) : ""}</td><td class=n>${r.dCo ? fmt(r.dCo) : ""}</td>
             <td class=n>${r.pNo ? fmt(r.pNo) : ""}</td><td class=n>${r.pCo ? fmt(r.pCo) : ""}</td>
             <td class=n><b>${r.cNo ? fmt(r.cNo) : ""}</b></td><td class=n><b>${r.cCo ? fmt(r.cCo) : ""}</b></td>
             <td class="noprint"><button class="${isSel ? "" : "s"}" style="padding:2px 6px" onclick="event.stopPropagation();openSoCai('${esc(r.tk)}')">Sổ cái</button> <button class="${isSel ? "" : "s"}" style="padding:2px 6px" onclick="event.stopPropagation();openS38('${esc(r.tk)}')">Sổ S38</button> <button class="s" style="padding:2px 6px" onclick="event.stopPropagation();startEditCdsps('${esc(r.tk)}','${esc(r.ten)}',${r.dNo},${r.dCo})">Sửa</button>${hasOp ? ` <button class="s" style="padding:2px 6px;color:#dc2626" onclick="event.stopPropagation();delCdspsOpening('${esc(r.tk)}')" title="Xóa số dư đầu kỳ TK">Xóa</button>` : ""}</td></tr>`;
         }).join("");
+        const recBanner = rec.hasError ? `<div class="st er noprint" style="flex-direction:column;align-items:stretch;gap:4px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+            <b>Lỗi đối chiếu công nợ giữa Bảng CDSPS và Danh mục KH / NCC (${perLbl}):</b>
+            <div style="display:flex;gap:6px">
+              ${rec.ar131.hasMismatch ? `<button class="s" style="padding:2px 8px" onclick="tab='kh';render()">Kiểm tra DM Khách hàng</button>` : ""}
+              ${rec.ap331.hasMismatch ? `<button class="s" style="padding:2px 8px" onclick="tab='ncc';render()">Kiểm tra DM NCC</button>` : ""}
+            </div>
+          </div>
+          ${rec.ar131.hasMismatch ? `<div>• <b>TK 131 (Phải thu KH):</b> CĐSPS ĐK (Nợ-Có) = <b>${fmt(rec.ar131.cdspsOpenNet)}</b> vs DM KH = <b>${fmt(rec.ar131.khOpenNet)}</b> (lệch ${fmt(rec.ar131.openDiff)}) · CĐSPS CK (Nợ-Có) = <b>${fmt(rec.ar131.cdspsEndNet)}</b> vs DM KH = <b>${fmt(rec.ar131.khEndNet)}</b> (lệch ${fmt(rec.ar131.endDiff)})</div>` : ""}
+          ${rec.ap331.hasMismatch ? `<div>• <b>TK 331 (Phải trả NCC):</b> CĐSPS ĐK (Có-Nợ) = <b>${fmt(rec.ap331.cdspsOpenNet)}</b> vs DM NCC = <b>${fmt(rec.ap331.nccOpenNet)}</b> (lệch ${fmt(rec.ap331.openDiff)}) · CĐSPS CK (Có-Nợ) = <b>${fmt(rec.ap331.cdspsEndNet)}</b> vs DM NCC = <b>${fmt(rec.ap331.nccEndNet)}</b> (lệch ${fmt(rec.ap331.endDiff)})</div>` : ""}
+        </div>` : "";
         h += `<div class="bar noprint">${upl("cdsps")}<button class="s" onclick="tpl('cdsps')">📄 Tải file mẫu đầu kỳ</button>
               <input id="cdQ" placeholder="Tìm số hiệu / tên TK..." value="${esc(cdQ)}">
               <select id="cdCir"><option value="TT200" ${cdspsCir === "TT200" ? "selected" : ""}>Mẫu Thông tư 200</option><option value="TT99" ${cdspsCir === "TT99" ? "selected" : ""}>Mẫu Thông tư 99</option></select>
@@ -1791,8 +2003,10 @@
               <button class="s" onclick="openCdspsPrintModal()">🖨 In sổ (${esc(selTk)})</button>
               <button class="s" onclick="openSoCai('${esc(selTk)}')">📖 Sổ cái (${esc(selTk)})</button>
               <button onclick="openS38('${esc(selTk)}')">📒 Sổ chi tiết S38 (${esc(selTk)})</button>
+              ${rec.hasError ? `<span class="s err-btn on" style="padding:4px 8px;border-radius:6px;font-weight:600">⚠ Lỗi lệch công nợ (${rec.errorCount} TK)</span>` : ""}
               <label><input id="cdHz" type="checkbox" ${cdspsHideZero ? "checked" : ""}> Ẩn TK trống</label>
               <label><input id="cdHnp" type="checkbox" ${cdspsHideNoPer ? "checked" : ""}> Khi in ẩn TK không PS kỳ</label></div>
+              ${recBanner}
               <div class="co" style="display:none"><div style="display:flex;justify-content:space-between"><div><b>${esc(CFG.ten)}</b><br>${esc(CFG.dc)}</div><div style="text-align:right"><b>Mẫu số S06-DN</b><br><i>${cirNote}</i></div></div></div>
               <h3 style="margin:0">BẢNG CÂN ĐỐI SỐ PHÁT SINH (${cdspsCir === "TT99" ? "TT 99" : "TT 200"}) · ${perLbl}</h3>
               <div class="w"><table><thead>
@@ -1814,6 +2028,7 @@
               ${soCaiPer.t !== "Năm" ? `<select id="scPk">${Array.from({ length: soCaiPer.t === "Quý" ? 4 : 12 }, (_, i) => i + 1).map(v => `<option value="${v}" ${v === soCaiPer.k ? "selected" : ""}>${soCaiPer.t} ${v}</option>`).join("")}</select>` : ""}
               <select id="scTk">${s.sortedTks.map(tk => `<option value="${esc(tk)}" ${tk === s.activeTk ? "selected" : ""}>${esc(tk)}</option>`).join("")}</select>
               <label><input id="scSub" type="checkbox" ${soCaiSub ? "checked" : ""}> Gộp cả TK con</label>
+              <label><input id="scAllowNeg" type="checkbox" ${soCaiAllowNeg ? "checked" : ""}> Cho phép số dư âm</label>
               <button class="s" id="scExp">⬇ Xuất Excel Sổ cái</button>
               <button onclick="window.print()">🖨 In Sổ cái (S03b-DN)</button></div>
               <div class="sc-wrap"><div class="sc">
@@ -1825,10 +2040,10 @@
                   <tr><th>Số hiệu</th><th>Ngày, tháng</th><th>Trang sổ</th><th>STT dòng</th><th>Nợ</th><th>Có</th></tr>
                   <tr><td align=center><i>A</i></td><td align=center><i>B</i></td><td align=center><i>C</i></td><td align=center><i>D</i></td><td align=center><i>E</i></td><td align=center><i>G</i></td><td align=center><i>H</i></td><td align=center><i>1</i></td><td align=center><i>2</i></td></tr>
                 </thead><tbody>
-                  <tr class="tt"><td></td><td></td><td></td><td>Số dư đầu kỳ</td><td></td><td></td><td></td><td class=n>${s.startNo ? fmt(s.startNo) : ""}</td><td class=n>${s.startCo ? fmt(s.startCo) : ""}</td></tr>
+                  <tr class="tt"><td></td><td></td><td></td><td>Số dư đầu kỳ</td><td></td><td></td><td></td><td class="n${s.startNo < 0 ? " neg" : ""}">${s.startNo ? fmt(s.startNo) : ""}</td><td class="n${s.startCo < 0 ? " neg" : ""}">${s.startCo ? fmt(s.startCo) : ""}</td></tr>
                   ${eRows}
                   <tr class="tt"><td></td><td></td><td></td><td>Cộng số phát sinh trong kỳ</td><td></td><td></td><td align=center>x</td><td class=n>${fmt(s.totNo)}</td><td class=n>${fmt(s.totCo)}</td></tr>
-                  <tr class="tt"><td></td><td></td><td></td><td>Số dư cuối kỳ</td><td></td><td></td><td align=center>x</td><td class=n>${s.endNo ? fmt(s.endNo) : "0"}</td><td class=n>${s.endCo ? fmt(s.endCo) : "0"}</td></tr>
+                  <tr class="tt"><td></td><td></td><td></td><td>Số dư cuối kỳ</td><td></td><td></td><td align=center>x</td><td class="n${s.endNo < 0 ? " neg" : ""}">${s.endNo ? fmt(s.endNo) : "0"}</td><td class="n${s.endCo < 0 ? " neg" : ""}">${s.endCo ? fmt(s.endCo) : "0"}</td></tr>
                   <tr class="tt"><td></td><td></td><td></td><td>Cộng lũy kế từ đầu năm</td><td></td><td></td><td align=center>x</td><td class=n>${fmt(s.ytdNo)}</td><td class=n>${fmt(s.ytdCo)}</td></tr>
                 </tbody></table></div>
                 <p>- Sổ này có ... trang, đánh số từ trang 01 đến trang ...<br>- Ngày mở sổ: 01/${String(s.a).padStart(2, "0")}/${C.Y}</p>
@@ -1837,10 +2052,10 @@
       } else if (tab === "s38") {
         const s = buildS38Context(C);
         const perLbl = s38Per.t === "Năm" ? `Năm ${C.Y}` : s38Per.t === "Quý" ? `Quý ${s38Per.k} năm ${C.Y} (Từ tháng ${String(s.a).padStart(2, "0")} đến tháng ${String(s.b).padStart(2, "0")})` : `Tháng ${String(s38Per.k).padStart(2, "0")} năm ${C.Y}`;
-        const cirNote = cdspsCir === "TT99" ? "(Kèm theo Thông tư số 99/2025/TT-BTC ngày 27/10/2025 của Bộ trưởng Bộ Tài chính)" : "(Ban hành theo Thông tư số 200/2014/TT-BTC ngày 22/12/2014 của Bộ Tài chính)";
+        const cirNote = cdspsCir === "TT99" ? "(Kèm theo Thông tư số 99/2025/TT-BTC ngày 27 tháng 10 năm 2025 của Bộ trưởng Bộ Tài chính)" : "(Ban hành theo Thông tư số 200/2014/TT-BTC ngày 22/12/2014 của Bộ Tài chính)";
         const sg = (t, n) => `<span><b>${t}</b><br><i>(Ký, họ tên)</i><br><br><br>${esc(n)}</span>`;
         const eRows = s.entries.length
-          ? s.entries.map(e => `<tr><td align=center>${dr(e.ngay)}</td><td>${esc(e.ph)}</td><td align=center>${dr(e.ngay)}</td><td>${esc(e.nd)}</td><td align=center>${esc(e.doiUng)}</td><td class=n>${e.psNo ? fmt(e.psNo) : ""}</td><td class=n>${e.psCo ? fmt(e.psCo) : ""}</td><td class=n>${fmt(e.duNo)}</td><td class=n>${fmt(e.duCo)}</td><td>${esc(e.gc)}</td></tr>`).join("")
+          ? s.entries.map(e => `<tr><td align=center>${dr(e.ngay)}</td><td>${esc(e.ph)}</td><td align=center>${dr(e.ngay)}</td><td>${esc(e.nd)}</td><td align=center>${esc(e.doiUng)}</td><td class=n>${e.psNo ? fmt(e.psNo) : ""}</td><td class=n>${e.psCo ? fmt(e.psCo) : ""}</td><td class="n${e.duNo < 0 ? " neg" : ""}">${fmt(e.duNo)}</td><td class="n${e.duCo < 0 ? " neg" : ""}">${fmt(e.duCo)}</td><td>${esc(e.gc)}</td></tr>`).join("")
           : `<tr><td colspan=10 align=center class="m" style="padding:14px">Không có phát sinh trong kỳ cho tài khoản ${esc(s.activeTk)}.</td></tr>`;
         h += `<div class="bar noprint"><button class="s" onclick="tab='cdsps';render()">← Quay lại Bảng CDSPS</button>
               <select id="s38Cir"><option value="TT200" ${cdspsCir === "TT200" ? "selected" : ""}>Thông tư 200</option><option value="TT99" ${cdspsCir === "TT99" ? "selected" : ""}>Thông tư 99</option></select>
@@ -1848,6 +2063,7 @@
               ${s38Per.t !== "Năm" ? `<select id="s38Pk">${Array.from({ length: s38Per.t === "Quý" ? 4 : 12 }, (_, i) => i + 1).map(v => `<option value="${v}" ${v === s38Per.k ? "selected" : ""}>${s38Per.t} ${v}</option>`).join("")}</select>` : ""}
               <select id="s38Tk">${s.sortedTks.map(tk => `<option value="${esc(tk)}" ${tk === s.activeTk ? "selected" : ""}>${esc(tk)}</option>`).join("")}</select>
               <label><input id="s38Sub" type="checkbox" ${s38Sub ? "checked" : ""}> Gộp cả TK con</label>
+              <label><input id="s38AllowNeg" type="checkbox" ${s38AllowNeg ? "checked" : ""}> Cho phép số dư âm</label>
               <button class="s" id="s38Exp">⬇ Xuất Excel</button>
               <button onclick="window.print()">🖨 In sổ S38-DN</button></div>
               <div class="sc-wrap"><div class="sc">
@@ -1858,10 +2074,10 @@
                   <tr><th rowspan=2>Ngày ghi sổ</th><th colspan=2>Chứng từ</th><th rowspan=2>Diễn giải</th><th rowspan=2>TK đối ứng</th><th colspan=2>Số phát sinh</th><th colspan=2>Số dư</th><th rowspan=2>Ghi chú</th></tr>
                   <tr><th>Số hiệu</th><th>Ngày, tháng</th><th>Nợ</th><th>Có</th><th>Nợ</th><th>Có</th></tr>
                 </thead><tbody>
-                  <tr class="tt"><td></td><td></td><td></td><td>Số dư đầu kỳ</td><td></td><td></td><td></td><td class=n>${fmt(s.startNo)}</td><td class=n>${fmt(s.startCo)}</td><td></td></tr>
+                  <tr class="tt"><td></td><td></td><td></td><td>Số dư đầu kỳ</td><td></td><td></td><td></td><td class="n${s.startNo < 0 ? " neg" : ""}">${fmt(s.startNo)}</td><td class="n${s.startCo < 0 ? " neg" : ""}">${fmt(s.startCo)}</td><td></td></tr>
                   ${eRows}
                   <tr class="tt"><td></td><td></td><td></td><td>Cộng số phát sinh trong kỳ</td><td align=center>x</td><td class=n>${fmt(s.totNo)}</td><td class=n>${fmt(s.totCo)}</td><td></td><td></td><td></td></tr>
-                  <tr class="tt"><td></td><td></td><td></td><td>Số dư cuối kỳ</td><td align=center>x</td><td></td><td></td><td class=n>${fmt(s.endNo)}</td><td class=n>${fmt(s.endCo)}</td><td></td></tr>
+                  <tr class="tt"><td></td><td></td><td></td><td>Số dư cuối kỳ</td><td align=center>x</td><td></td><td></td><td class="n${s.endNo < 0 ? " neg" : ""}">${fmt(s.endNo)}</td><td class="n${s.endCo < 0 ? " neg" : ""}">${fmt(s.endCo)}</td><td></td></tr>
                 </tbody></table></div>
                 <p>- Sổ này có ... trang, đánh số từ trang 01 đến trang ...<br>- Ngày mở sổ: 01/${String(s.a).padStart(2, "0")}/${C.Y}</p>
                 <div class="sg">${sg("Người ghi sổ", CFG.ghi)}${sg("Kế toán trưởng", CFG.kt)}<span><i>Ngày..... tháng.... năm ${C.Y}</i><br><b>Người đại diện theo pháp luật</b><br><i>(Ký, họ tên, đóng dấu)</i><br><br><br>${esc(CFG.dd)}</span></div>
@@ -1871,22 +2087,35 @@
         const per = tab === "kh" ? khPer : nccPer, qVal = tab === "kh" ? khQ : nccQ, sortObj = tab === "kh" ? khSort : nccSort;
         const pEditRow = (drf, isNew) => `<tr style="background:var(--warn)">
           <td><input data-ept="ma" value="${esc(drf.ma)}" style="width:92px" placeholder="Mã"></td>
-          <td><input data-ept="ten" value="${esc(drf.ten)}" style="width:220px" placeholder="Tên đối tượng"></td>
-          <td><input data-ept="mst" value="${esc(drf.mst)}" style="width:110px" placeholder="MST"></td>
-          <td><input type="number" data-ept="dau" value="${drf.dau}" style="width:104px;text-align:right"></td>
-          <td></td><td></td><td></td>
+          <td><input data-ept="ten" value="${esc(drf.ten)}" style="width:210px" placeholder="Tên đối tượng"></td>
+          <td><input data-ept="mst" value="${esc(drf.mst)}" style="width:104px" placeholder="MST"></td>
+          <td><input type="number" data-ept="dauNo" value="${drf.dauNo}" style="width:100px;text-align:right"></td>
+          <td><input type="number" data-ept="dauCo" value="${drf.dauCo}" style="width:100px;text-align:right"></td>
+          <td></td><td></td><td></td><td></td>
           <td class="noprint"><button style="padding:2px 6px" onclick="savePartner()">${isNew ? "Lưu mới" : "Lưu"}</button> <button class="s" style="padding:2px 6px" onclick="editPartner=null;render()">Hủy</button></td></tr>`;
         const newPartnerHtml = (editPartner && editPartner.kind === tab && editPartner.origMa === null) ? pEditRow(editPartner.draft, true) : "";
         const rows = d.rows.map(o => {
           if (editPartner && editPartner.kind === tab && editPartner.origMa === o.ma) return pEditRow(editPartner.draft, false);
-          return `<tr data-edit-pt="${esc(o.ma)}" data-ptkind="${tab}" data-ptten="${esc(o.ten)}" data-ptmst="${esc(o.mst)}" data-ptdau="${o.dau}" style="cursor:pointer" title="Click dòng để sửa"><td>${esc(o.ma)}</td><td>${esc(o.ten)}</td><td>${esc(o.mst)}</td><td class=n>${fmt(o.dau)}</td><td class=n>${fmt(o.n)}</td><td class=n>${fmt(o.c)}</td><td class=n>${fmt(o.cu)}</td><td class="noprint"><button class="s" style="padding:2px 6px" onclick="event.stopPropagation();startEditPartner('${tab}','${esc(o.ma)}','${esc(o.ten)}','${esc(o.mst)}',${o.dau})">Sửa</button>${o.inList ? ` <button class="s" style="padding:2px 6px;color:#dc2626" onclick="event.stopPropagation();delPartner('${tab}','${esc(o.ma)}')">Xóa</button>` : ""}</td></tr>`;
+          return `<tr data-edit-pt="${esc(o.ma)}" data-ptkind="${tab}" data-ptten="${esc(o.ten)}" data-ptmst="${esc(o.mst)}" data-ptdauno="${o.dauNo}" data-ptdauco="${o.dauCo}" style="cursor:pointer" title="Click dòng để sửa"><td>${esc(o.ma)}</td><td>${esc(o.ten)}</td><td>${esc(o.mst)}</td><td class=n>${fmt(o.dauNo)}</td><td class=n>${fmt(o.dauCo)}</td><td class=n>${fmt(o.n)}</td><td class=n>${fmt(o.c)}</td><td class=n>${fmt(o.cuNo)}</td><td class=n>${fmt(o.cuCo)}</td><td class="noprint"><button class="s" style="padding:2px 6px" onclick="event.stopPropagation();startEditPartner('${tab}','${esc(o.ma)}','${esc(o.ten)}','${esc(o.mst)}',${o.dauNo},${o.dauCo})">Sửa</button>${o.inList ? ` <button class="s" style="padding:2px 6px;color:#dc2626" onclick="event.stopPropagation();delPartner('${tab}','${esc(o.ma)}')">Xóa</button>` : ""}</td></tr>`;
         }).join("");
-        const pHead = catThHtml([["ma", tab === "kh" ? "Mã KH" : "Mã NCC", 0], ["ten", tab === "kh" ? "Thông tin khách hàng" : "Thông tin nhà cung cấp", 0], ["mst", "MST", 0], ["dau", "Đầu kỳ", 1], ["n", "Phát sinh Nợ", 1], ["c", "Phát sinh Có", 1], ["cu", "Cuối kỳ", 1], ["", "Thao tác", 0]], sortObj, tab);
+        const sTh = (k, lbl, isN) => {
+          const ind = sortObj.k === k ? (sortObj.d === 1 ? " ▲" : " ▼") : " ⇅";
+          return `<th class="sort ${isN ? "n" : ""}" data-csort="${k}" data-ckind="${tab}" title="Bấm để sắp xếp">${lbl}<span style="opacity:.6;font-size:12px">${ind}</span></th>`;
+        };
+        const sThR2 = (k, lbl) => {
+          const ind = sortObj.k === k ? (sortObj.d === 1 ? " ▲" : " ▼") : " ⇅";
+          return `<th rowspan=2 class="sort" data-csort="${k}" data-ckind="${tab}" title="Bấm để sắp xếp">${lbl}<span style="opacity:.6;font-size:12px">${ind}</span></th>`;
+        };
+        const pHead = `<tr>${sThR2("ma", tab === "kh" ? "Mã KH" : "Mã NCC")}${sThR2("ten", tab === "kh" ? "Thông tin khách hàng" : "Thông tin nhà cung cấp")}${sThR2("mst", "MST")}<th colspan=2 style="text-align:center">Số dư đầu kỳ</th><th colspan=2 style="text-align:center">Số phát sinh</th><th colspan=2 style="text-align:center">Số dư cuối kỳ</th><th rowspan=2 class="noprint">Thao tác</th></tr>
+          <tr>${sTh("dauNo", "Nợ", 1)}${sTh("dauCo", "Có", 1)}${sTh("n", "Nợ", 1)}${sTh("c", "Có", 1)}${sTh("cuNo", "Nợ", 1)}${sTh("cuCo", "Có", 1)}</tr>`;
+        const netSummary = tab === "kh"
+          ? `TK 131x · Nợ - Có: ĐK <b>${fmt(d.T.dauNo - d.T.dauCo)}</b> · CK <b>${fmt(d.T.cuNo - d.T.cuCo)}</b>`
+          : `TK 331x · Có - Nợ: ĐK <b>${fmt(d.T.dauCo - d.T.dauNo)}</b> · CK <b>${fmt(d.T.cuCo - d.T.cuNo)}</b>`;
         h += `<div class="bar">${upl(tab)}<button class="s" onclick="tpl('${tab}')">📄 Tải file mẫu</button><button onclick="addPartner('${tab}')">+ Thêm ${tab === "kh" ? "KH" : "NCC"}</button><button class="s" onclick="expTab('${tab}')">⬇ Xuất Excel</button>
               <input id="${tab}Q" placeholder="Tìm mã / tên / MST..." value="${esc(qVal)}">
               ${perCtrlHtml(tab, per, "Kỳ PS:")}
-              <span class="m">Bấm tiêu đề cột để sắp xếp.</span></div>
-              <div class="w"><table><thead>${pHead}<tr class="tt"><td colspan=3>TỔNG CỘNG (${d.rows.length})</td>${d.T.map(v => `<td class=n>${fmt(v)}</td>`).join("")}<td class="noprint"></td></tr></thead><tbody>${newPartnerHtml}${rows}</tbody></table></div>`;
+              <span class="m">Bấm tiêu đề cột để sắp xếp · ${netSummary}</span></div>
+              <div class="w"><table><thead>${pHead}<tr class="tt"><td colspan=3>TỔNG CỘNG (${d.rows.length})</td><td class=n>${fmt(d.T.dauNo)}</td><td class=n>${fmt(d.T.dauCo)}</td><td class=n>${fmt(d.T.n)}</td><td class=n>${fmt(d.T.c)}</td><td class=n>${fmt(d.T.cuNo)}</td><td class=n>${fmt(d.T.cuCo)}</td><td class="noprint"></td></tr></thead><tbody>${newPartnerHtml}${rows}</tbody></table></div>`;
       } else if (tab === "cf") {
         const cfFields = [["ten", "Tên đơn vị"], ["dc", "Địa chỉ"], ["mst", "Mã số thuế"], ["tk", "Tài khoản kho (VD 156)"], ["kho", "Tên kho"], ["ghi", "Người ghi sổ"], ["kt", "Kế toán trưởng"], ["dd", "Người đại diện theo pháp luật"]];
         const cq = cfQ.trim().toLowerCase();
@@ -1927,6 +2156,10 @@
       }
       if (e.target.id === "ctOnlyErr") { ctOnlyErr = !ctOnlyErr; render(); return; }
       if (e.target.id === "vpOnlyErr") { vpddOnlyErr = !vpddOnlyErr; render(); return; }
+      if (e.target.id === "ctOnlyRet") { ctOnlyRet = !ctOnlyRet; render(); return; }
+      if (e.target.id === "vpOnlyRet") { vpddOnlyRet = !vpddOnlyRet; render(); return; }
+      if (e.target.id === "tkOnlyNeg") { tkOnlyNeg = !tkOnlyNeg; render(); return; }
+      if (e.target.id === "tkVpOnlyNeg") { tkVpOnlyNeg = !tkVpOnlyNeg; render(); return; }
       if (e.target.closest("button")) return;
       const ect = e.target.closest("tr[data-edit-ct]");
       if (ect && (tab === "ct" || tab === "ct_vpdd")) {
@@ -1945,7 +2178,7 @@
       }
       const ept = e.target.closest("tr[data-edit-pt]");
       if (ept && (tab === "kh" || tab === "ncc")) {
-        startEditPartner(ept.dataset.ptkind, ept.dataset.editPt, ept.dataset.ptten, ept.dataset.ptmst, +ept.dataset.ptdau);
+        startEditPartner(ept.dataset.ptkind, ept.dataset.editPt, ept.dataset.ptten, ept.dataset.ptmst, +ept.dataset.ptdauno, +ept.dataset.ptdauco);
         return;
       }
       const tkRow = e.target.closest("tr[data-tk]");
@@ -1964,6 +2197,8 @@
       else if (t.id === "ktVp") { ktVpdd.t = t.value; ktVpdd.k = 1; render(); }
       else if (t.id === "kkVp") { ktVpdd.k = +t.value; render(); }
       else if (t.id === "vpAll") { vpddShowAll = t.checked; render(); }
+      else if (t.id === "tkNegTop") { tkNegTop = t.checked; render(); }
+      else if (t.id === "tkVpNegTop") { tkVpNegTop = t.checked; render(); }
       else if (t.id === "ctErrTop") { ctErrTop = t.checked; render(); }
       else if (t.id === "vpErrTop") { vpddErrTop = t.checked; render(); }
       else if (t.id === "sp") { if (t.dataset.vp === "1") scVpddMa = t.value; else scMa = t.value; render(); }
@@ -1999,11 +2234,13 @@
       else if (t.id === "s38Pk") { s38Per.k = +t.value; render(); }
       else if (t.id === "s38Tk") { selTk = t.value; render(); }
       else if (t.id === "s38Sub") { s38Sub = t.checked; render(); }
+      else if (t.id === "s38AllowNeg") { s38AllowNeg = t.checked; render(); }
       else if (t.id === "scCir") { cdspsCir = t.value; render(); }
       else if (t.id === "scPt") { soCaiPer.t = t.value; soCaiPer.k = 1; render(); }
       else if (t.id === "scPk") { soCaiPer.k = +t.value; render(); }
       else if (t.id === "scTk") { selTk = t.value; render(); }
       else if (t.id === "scSub") { soCaiSub = t.checked; render(); }
+      else if (t.id === "scAllowNeg") { soCaiAllowNeg = t.checked; render(); }
       else if (t.id === "yr") {
         const y = +t.value || 2026;
         ctPer.y = vpddPer.y = nkPer.y = dmPer.y = khPer.y = nccPer.y = y;
@@ -2052,7 +2289,7 @@
         else editCdsps[k] = t.value;
       } else if (t.dataset.ept && editPartner) {
         const k = t.dataset.ept;
-        if (k === "dau") editPartner.draft.dau = Math.round(Number(t.value) || 0);
+        if (k === "dauNo" || k === "dauCo") editPartner.draft[k] = Math.round(Number(t.value) || 0);
         else editPartner.draft[k] = t.value;
       } else if (t.dataset.nkkey) {
         if (t.dataset.nksrc === "imp") { const i = +t.dataset.nkidx; if (NKX[i]) NKX[i].gc = t.value; }
@@ -2119,8 +2356,8 @@
         { tk: "411", ten: "Vốn đầu tư của chủ sở hữu", no: 0, co: 209800000 }
       );
       NKX.push({ ngay: "2026-01-10", ph: "BH-0101", hd: "0000101", nd: "Doanh thu bán hàng Cty ABC", no: "131", co: "511", tien: 15000000, kh: "KH01", gc: "Xuất HĐ VAT" });
-      KH.push({ ma: "KH01", ten: "Công ty ABC", mst: "0301234567", dau: 5000000 });
-      NCC.push({ ma: "NCC01", ten: "Công ty Hoàng Long", mst: "0101234567", dau: 12000000 });
+      KH.push({ ma: "KH01", ten: "Công ty ABC", mst: "0301234567", dauNo: 5000000, dauCo: 0, dau: 5000000 });
+      NCC.push({ ma: "NCC01", ten: "Công ty Hoàng Long", mst: "0101234567", dauNo: 0, dauCo: 12000000, dau: 12000000 });
       Object.assign(CFG, { ten: "CÔNG TY TNHH MINH ANH", dc: "128 Nguyễn Thị Minh Khai, Q3, TP.HCM", mst: "0314567890" });
       saveLocal(); st("Đã nạp dữ liệu mẫu (gồm cả đầu kỳ TK cho Bảng CDSPS & kho VPĐD 1368)."); render();
     };
