@@ -124,37 +124,68 @@
       border-radius: 8px;
       background: var(--surface);
     }
-    table { border-collapse: collapse; width: 100%; white-space: nowrap; font-size: 15px; }
+    table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: 12.5px; }
     thead { position: sticky; top: 0; z-index: 2; }
     tfoot { position: sticky; bottom: 0; z-index: 2; }
     th {
       background: var(--hd);
       color: var(--hf);
-      padding: 7px 8px;
+      padding: 5px 3px;
+      font-size: 12px;
+      line-height: 1.25;
       font-weight: 600;
       text-align: left;
       border-bottom: 1px solid var(--line);
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
     th.n { text-align: right; }
     th.sort { cursor: pointer; user-select: none; }
     th.sort:hover { background: #334155; }
-    td { padding: 5px 8px; border-top: 1px solid var(--line); }
-    td.n { text-align: right; font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    td {
+      padding: 4px 3px;
+      border-top: 1px solid var(--line);
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      vertical-align: middle;
+      line-height: 1.3;
+    }
+    td.n { text-align: right; font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; }
+    td input, td select { width: 100%; max-width: 100%; min-width: 0; padding: 2px 4px; font-size: 12px; }
+    .nd-cell.compact { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; word-break: normal; overflow-wrap: normal; }
+    .nd-toggle { padding: 1px 5px; font-size: 10px; line-height: 1.2; border-radius: 4px; margin-left: 3px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.35); color: #fff; font-weight: 500; }
+    .nd-toggle:hover { background: rgba(255,255,255,.28); }
+    .ret-gi-inp { width: 100%; text-align: right; font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; padding: 2px 4px !important; font-size: 12px !important; }
+    .ret-gi-inp.need { border: 1.5px solid #0284c7 !important; background: #fff !important; color: #0c4a6e !important; }
+    .ret-gi-inp.ok { border: 1px solid #38bdf8 !important; background: #f0f9ff !important; color: #0369a1 !important; }
+    .ret-direct-hint { color: #0284c7; font-size: 11px; font-style: italic; font-family: inherit; }
+    button.s.on { background: var(--sel); color: var(--ac); border-color: var(--ac); font-weight: 600; }
+    .pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; flex-shrink: 0; color: var(--mut); }
+    .pager-btns { display: flex; align-items: center; gap: 4px; }
+    .pager-btns button { padding: 3px 8px; font-size: 12px; }
     tr:hover td { background: rgba(148, 163, 184, 0.08); }
-    tr.sel td { background: var(--sel) !important; }
+    tr.sel td { background: var(--sel) !important; box-shadow: inset 0 1px 0 var(--ac), inset 0 -1px 0 var(--ac); }
     tr.br td { background: rgba(59, 130, 246, 0.08); }
     tr.ret td { background: #e0f2fe; color: #0c4a6e; }
     tr.ret-ok td { background: rgba(14, 165, 233, 0.08); }
     tr.er td { background: var(--er); color: var(--er-fg); }
+    tr.sel.er td { background: #fecaca !important; box-shadow: inset 0 1.5px 0 #dc2626, inset 0 -1.5px 0 #dc2626; }
+    tr.sel.ret td { background: #bae6fd !important; box-shadow: inset 0 1.5px 0 #0284c7, inset 0 -1.5px 0 #0284c7; }
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme=light]) tr.ret td { background: #082f49; color: #bae6fd; }
+      :root:not([data-theme=light]) tr.sel.ret td { background: #0c4a6e !important; }
+      :root:not([data-theme=light]) tr.sel.er td { background: #991b1b !important; }
       :root:not([data-theme=light]) .st.bl { background: #082f49; color: #bae6fd; border-color: #0369a1; }
       :root:not([data-theme=light]) .ret-btn { background: #082f49; color: #bae6fd; border-color: #0369a1; }
+      :root:not([data-theme=light]) .ret-gi-inp.need { background: #0f172a !important; color: #bae6fd !important; }
+      :root:not([data-theme=light]) .ret-gi-inp.ok { background: #082f49 !important; color: #e0f2fe !important; }
     }
     .neg { color: #dc2626; font-weight: 700; }
     tr.tt td, tfoot td { font-weight: 700; background: var(--card); color: var(--fg); }
     tfoot td { border-top: 1px solid var(--line); }
-    .m { color: var(--mut); font-size: 15px; }
+    .m { color: var(--mut); font-size: 14px; }
     .st {
       padding: 7px 10px;
       border-radius: 6px;
@@ -206,7 +237,7 @@
     .err-btn.on { background: #dc2626; color: #fff; border-color: #dc2626; }
     .ret-btn { background: #e0f2fe; color: #0369a1; border-color: #7dd3fc; }
     .ret-btn.on { background: #0284c7; color: #fff; border-color: #0284c7; }
-    .nk-gc { width: 195px; padding: 3px 6px; font-size: 15px; border-color: transparent; background: transparent; }
+    .nk-gc { width: 100%; padding: 2px 4px; font-size: 12px; border-color: transparent; background: transparent; }
     .nk-gc:hover, .nk-gc:focus { border-color: var(--line); background: var(--surface); }
     @media print {
       html, body { height: auto !important; overflow: visible !important; background: #fff !important; color: #000 !important; font-size: 12px !important; }
@@ -317,6 +348,15 @@
     let ctSort = { k: "", d: 1 }, vpddSort = { k: "", d: 1 };
     let ctErrTop = true, ctOnlyErr = false, ctOnlyRet = false;
     let vpddErrTop = true, vpddOnlyErr = false, vpddOnlyRet = false;
+    let ctNdCompact = false, vpddNdCompact = false, nkNdCompact = false;
+    let ctCompactCols = false, vpddCompactCols = false, tkCompactCols = false, tkVpddCompactCols = false, nkCompactCols = false;
+    let selCtId = "", selVpddId = "", selDmMa = "", selNkKey = "", selKhMa = "", selNccMa = "";
+    let directRetEdit = null; // { id, isVp, value }
+    let directNkNoteKey = "";
+    let _skipDirectBlur = false;
+    let pendingRetRecalc = false;
+    const PAGE_SIZE = 150;
+    const tabPage = { ct: 1, ct_vpdd: 1, nk: 1, dm: 1, tk: 1, tk_vpdd: 1, kh: 1, ncc: 1 };
     let tkNegTop = true, tkOnlyNeg = false;
     let tkVpNegTop = true, tkVpOnlyNeg = false;
     let editLine = null; // { isVp, isNew, draft }
@@ -337,6 +377,14 @@
     let soCaiPer = { t: "Năm", k: 1 }, soCaiSub = false, soCaiAllowNeg = true;
     let msg = "", merr = 0;
 
+    let _dirtyC = true, _dirtyVp = true, _dirtyNk = true;
+    let _cacheC = null, _cacheVpProds = null, _cacheVpLines = null, _cacheCVp = null, _cacheNk = null;
+    function markDirty(scope = "all") {
+      if (scope === "vp") { _dirtyVp = true; }
+      else if (scope === "nk") { _dirtyNk = true; }
+      else { _dirtyC = true; _dirtyVp = true; _dirtyNk = true; }
+    }
+
     const TABS = [
       ["nk", "Nhật ký chung"],
       ["cdsps", "Bảng CDSPS"],
@@ -350,16 +398,26 @@
       ["cf", "Thông tin doanh nghiệp"]
     ];
 
+    let _saveTimer = null;
     function saveLocal() {
+      if (_saveTimer) { clearTimeout(_saveTimer); _saveTimer = null; }
       try {
         localStorage.setItem(STORE_KEY, JSON.stringify({
           yr: +$("#yr").value || 2026,
           up: +$("#up").value || 0,
           P, Ln, LnVPDD, vpddOpening, tkOpening, nkNotes, NKX, KH, NCC, CFG
         }));
-        $("#sy").textContent = "Đã tự lưu trên trình duyệt";
+        const sy = $("#sy");
+        if (sy) sy.textContent = "Đã tự lưu trên trình duyệt";
       } catch (e) {}
     }
+    function scheduleSaveLocal() {
+      const sy = $("#sy");
+      if (sy) sy.textContent = "Đang lưu...";
+      if (_saveTimer) clearTimeout(_saveTimer);
+      _saveTimer = setTimeout(saveLocal, 380);
+    }
+    window.addEventListener("beforeunload", () => { if (_saveTimer) saveLocal(); });
 
     function loadLocal() {
       try {
@@ -370,7 +428,7 @@
         if (d.up != null) $("#up").value = d.up;
         if (Array.isArray(d.P)) P.push(...d.P);
         if (Array.isArray(d.Ln)) { Ln.push(...d.Ln); ensureIds(Ln); }
-        if (Array.isArray(d.LnVPDD)) { LnVPDD.push(...d.LnVPDD); ensureIds(LnVPDD); }
+        if (Array.isArray(d.LnVPDD)) { LnVPDD.push(...(d.LnVPDD)); ensureIds(LnVPDD); }
         if (d.vpddOpening) Object.assign(vpddOpening, d.vpddOpening);
         if (Array.isArray(d.tkOpening)) tkOpening.push(...d.tkOpening);
         if (d.nkNotes) Object.assign(nkNotes, d.nkNotes);
@@ -379,6 +437,7 @@
         if (Array.isArray(d.NCC)) NCC.push(...d.NCC);
         if (d.CFG) Object.assign(CFG, d.CFG);
         ctPer.y = vpddPer.y = nkPer.y = dmPer.y = khPer.y = nccPer.y = +$("#yr").value || 2026;
+        markDirty("all");
       } catch (e) {}
     }
 
@@ -495,12 +554,14 @@
         targetArr.push(...incoming);
         if (!isVpdd && targetArr[0]?.ngay) $("#yr").value = targetArr[0].ngay.slice(0, 4);
         st(`Đã ghi thêm ${incoming.length} dòng vào dữ liệu sẵn có. Cột: ${cols}`);
+        markDirty(isVpdd ? "vp" : "all");
         close(); saveLocal(); render();
       };
       $("#m-over").onclick = () => {
         targetArr.length = 0; targetArr.push(...incoming);
         if (!isVpdd && targetArr[0]?.ngay) $("#yr").value = targetArr[0].ngay.slice(0, 4);
         st(`Đã ghi đè (xóa dữ liệu cũ), giữ ${incoming.length} dòng mới. Cột: ${cols}`);
+        markDirty(isVpdd ? "vp" : "all");
         close(); saveLocal(); render();
       };
       if (hasOther) {
@@ -508,6 +569,7 @@
           const kept = targetArr.filter(l => !l.ngay || l.ngay.length < 7 || !overlapSet.has(l.ngay.slice(0, 7)));
           targetArr.length = 0; targetArr.push(...kept, ...incoming);
           st(`Đã thay thế riêng kỳ trùng bằng ${incoming.length} dòng mới. Cột: ${cols}`);
+          markDirty(isVpdd ? "vp" : "all");
           close(); saveLocal(); render();
         };
       }
@@ -541,6 +603,7 @@
                 P.push({ ma, ten: String(g(r, "ten") ?? ""), dvt: String(g(r, "dvt") ?? ""), sl, gt: Math.round(num(g(r, "gt")) ?? sl * dg) });
               }
             });
+            markDirty("all");
           } else if (kind === "tk_vpdd") {
             for (const k in vpddOpening) delete vpddOpening[k];
             rows.forEach(r => {
@@ -550,6 +613,7 @@
                 vpddOpening[ma] = { sl, gt: Math.round(num(g(r, "gt")) ?? sl * dg) };
               }
             });
+            markDirty("vp");
           } else if (kind === "cdsps") {
             tkOpening.length = 0;
             rows.forEach(r => {
@@ -566,6 +630,7 @@
                 tien: Math.round(t || 0), kh: String(g(r, "kh")), gc: String(g(r, "gc") ?? "")
               });
             });
+            markDirty("nk");
           } else if (kind === "kh" || kind === "ncc") {
             const A = kind === "kh" ? KH : NCC;
             A.length = 0;
@@ -615,10 +680,12 @@
               targetArr.push(...incoming);
               if (incoming[0]?.ngay) { $("#yr").value = incoming[0].ngay.slice(0, 4); ctPer.y = vpddPer.y = +$("#yr").value; }
               st(`Đã ghi thêm ${incoming.length} dòng kỳ mới. Cột nhận diện: ${cols}`);
+              markDirty(isVpdd ? "vp" : "all");
               saveLocal(); render(); return;
             }
             targetArr.length = 0; targetArr.push(...incoming);
             if (targetArr[0]?.ngay) { $("#yr").value = targetArr[0].ngay.slice(0, 4); ctPer.y = vpddPer.y = +$("#yr").value; }
+            markDirty(isVpdd ? "vp" : "all");
           }
           st(`Đã đọc ${rows.length} dòng. Cột nhận diện: ${cols}`);
           saveLocal(); render();
@@ -631,11 +698,17 @@
 
     function calcSet(products, lines) {
       const Y = +$("#yr").value, U = +$("#up").value;
-      const pm = {}; products.forEach(p => pm[p.ma] = p);
-      const M = {}; products.forEach(p => M[p.ma] = {});
-      const first = {}, errs = new Map(), retWarns = new Map();
-      lines.forEach(l => {
-        l._m = l.ngay && +l.ngay.slice(0, 4) === Y ? +l.ngay.slice(5, 7) : 0;
+      const pm = new Map(), M = {}, first = {}, errs = new Map(), retWarns = new Map();
+      const buckets = new Map();
+      for (let i = 0; i < products.length; i++) {
+        const p = products[i];
+        pm.set(p.ma, p);
+        M[p.ma] = {};
+      }
+      for (let i = 0; i < lines.length; i++) {
+        const l = lines[i];
+        const m = (l.ngay && +l.ngay.slice(0, 4) === Y) ? +l.ngay.slice(5, 7) : 0;
+        l._m = m;
         l.gn = l.gn != null ? Math.round(l.gn) : null;
         l.gtn = l.sn != null ? Math.round(l.sn * (l.gn || 0)) : null;
         l.px = null;
@@ -646,18 +719,29 @@
         if (!l.ph) e = "Thiếu mã phiếu";
         else if (!l.ngay) e = "Thiếu ngày";
         else if (first[l.ph] && first[l.ph].ngay !== l.ngay) e = `Mã phiếu bị trùng, đã có ở ngày ${dr(first[l.ph].ngay)} - vui lòng kiểm tra lại`;
-        else if (!pm[l.ma]) e = "Mã hàng chưa có trong danh mục";
+        else if (!pm.has(l.ma)) e = "Mã hàng chưa có trong danh mục";
         if (l.ph && !first[l.ph]) first[l.ph] = l;
         if (e) errs.set(l, e);
         if (l._retWarn) retWarns.set(l, l._retWarn);
-      });
-      products.forEach(p => {
+        if (m >= 1 && m <= U && pm.has(l.ma)) {
+          let mm = buckets.get(l.ma);
+          if (!mm) { mm = new Map(); buckets.set(l.ma, mm); }
+          let arr = mm.get(m);
+          if (!arr) { arr = []; mm.set(m, arr); }
+          arr.push(l);
+        }
+      }
+      for (let pi = 0; pi < products.length; pi++) {
+        const p = products[pi];
         let s = p.sl, g = Math.round(p.gt);
+        const mm = buckets.get(p.ma);
         for (let m = 1; m <= U; m++) {
-          const ls = lines.filter(l => l.ma === p.ma && l._m === m).sort((a, b) => a.ngay < b.ngay ? -1 : a.ngay > b.ngay ? 1 : 0);
+          const ls = mm ? (mm.get(m) || []) : [];
+          if (ls.length > 1) ls.sort((a, b) => a.ngay < b.ngay ? -1 : a.ngay > b.ngay ? 1 : 0);
           let nS = 0, nG = 0, posXS = 0, retS = 0, retG = 0;
           const exps = [];
-          ls.forEach(l => {
+          for (let j = 0; j < ls.length; j++) {
+            const l = ls[j];
             nS += l.sn || 0;
             nG += l.gtn || 0;
             const sxVal = l.sx || 0;
@@ -676,15 +760,14 @@
               posXS += sxVal;
               exps.push(l);
             }
-          });
-          // retS / retG are negative for customer returns, so subtracting adds returned stock back
+          }
           const availS = s + nS - retS;
           const availG = Math.round(g + nG - retG);
           const pr = availS > 0 && availG > 0 ? Math.round(availG / availS) : 0;
           const endS = availS - posXS;
           let cumPosGx = 0;
-          exps.forEach((l, idx) => {
-            const qty = l.sx || 0;
+          for (let idx = 0; idx < exps.length; idx++) {
+            const l = exps[idx], qty = l.sx || 0;
             if (endS >= 0) {
               const remG = Math.max(0, availG - cumPosGx);
               if (idx === exps.length - 1 && endS === 0) {
@@ -701,15 +784,15 @@
               l.gx = Math.round(qty * unitP);
             }
             cumPosGx += l.gx || 0;
-          });
+          }
           const xS = retS + posXS;
           const xG = retG + cumPosGx;
           M[p.ma][m] = { dS: s, dG: g, nS, nG, xS, xG, pr };
           s = s + nS - xS;
           g = s === 0 ? 0 : Math.round(g + nG - xG);
         }
-      });
-      return { M, errs, retWarns, Y, U };
+      }
+      return { M, pm, errs, retWarns, Y, U };
     }
 
     function getVpddProducts() {
@@ -723,7 +806,27 @@
         ma: l.ma, sn: l.sx, gn: l.px != null ? Math.round(l.px) : (l.gx != null && l.sx ? Math.round(l.gx / l.sx) : 0),
         sx: null, gi: null, _auto: 1
       }));
-      return autoIn.concat(LnVPDD.map(l => Object.assign(l, { _auto: 0 })));
+      return autoIn.concat(LnVPDD.map(l => { l._auto = 0; return l; }));
+    }
+
+    function getC() {
+      if (_dirtyC || !_cacheC) {
+        _cacheC = calcSet(P, Ln);
+        _dirtyC = false;
+        _dirtyNk = true;
+      }
+      return _cacheC;
+    }
+
+    function getVpContext() {
+      const C = getC();
+      if (_dirtyVp || !_cacheCVp) {
+        _cacheVpProds = getVpddProducts();
+        _cacheVpLines = getVpddLines();
+        _cacheCVp = calcSet(_cacheVpProds, _cacheVpLines);
+        _dirtyVp = false;
+      }
+      return { C, vpProds: _cacheVpProds, vpLines: _cacheVpLines, CVp: _cacheCVp };
     }
 
     function rangeOf(per) {
@@ -838,7 +941,7 @@
       XLSX.writeFile(wb, "mau-import-" + k + ".xlsx");
     }
 
-    function applySort(arr, sortObj, errTop) {
+    function applySort(arr, sortObj, errTop, pm) {
       const k = sortObj.k, d = sortObj.d;
       const numK = new Set(["sn", "gn", "gtn", "sx", "px", "gx"]);
       const getPrio = x => x._retWarn ? 2 : (errTop && x._err ? 1 : 0);
@@ -848,8 +951,8 @@
         if (!k) return 0;
         if (numK.has(k)) return ((a[k] ?? -Infinity) - (b[k] ?? -Infinity)) * d;
         let av = "", bv = "";
-        if (k === "ten") { av = (P.find(p => p.ma === a.ma) || {}).ten || ""; bv = (P.find(p => p.ma === b.ma) || {}).ten || ""; }
-        else if (k === "dvt") { av = (P.find(p => p.ma === a.ma) || {}).dvt || ""; bv = (P.find(p => p.ma === b.ma) || {}).dvt || ""; }
+        if (k === "ten") { av = (pm.get(a.ma) || {}).ten || ""; bv = (pm.get(b.ma) || {}).ten || ""; }
+        else if (k === "dvt") { av = (pm.get(a.ma) || {}).dvt || ""; bv = (pm.get(b.ma) || {}).dvt || ""; }
         else if (k === "err") { av = [a._err, a._retWarn].filter(Boolean).join("; "); bv = [b._err, b._retWarn].filter(Boolean).join("; "); }
         else { av = String(a[k] ?? ""); bv = String(b[k] ?? ""); }
         return av.localeCompare(bv, "vi") * d;
@@ -874,6 +977,8 @@
       const arr = isVpdd ? LnVPDD : Ln;
       const found = arr.find(x => x.id === id);
       if (!found) return;
+      directRetEdit = null;
+      if (isVpdd) selVpddId = id; else selCtId = id;
       editLine = { isVp: isVpdd, isNew: false, draft: { ...found } };
       render();
     }
@@ -883,11 +988,13 @@
       const arr = editLine.isVp ? LnVPDD : Ln;
       if (editLine.isNew) {
         arr.unshift({ ...editLine.draft });
+        if (editLine.isVp) selVpddId = editLine.draft.id; else selCtId = editLine.draft.id;
       } else {
         const idx = arr.findIndex(x => x.id === editLine.draft.id);
         if (idx >= 0) arr[idx] = { ...editLine.draft };
       }
       st(`${editLine.isNew ? "Đã thêm" : "Đã cập nhật"} dòng phiếu ${editLine.draft.ph || "(trống)"} và tính lại giá vốn.`);
+      markDirty(editLine.isVp ? "vp" : "all");
       editLine = null;
       saveLocal(); render();
     }
@@ -897,8 +1004,72 @@
       const idx = arr.findIndex(x => x.id === id);
       if (idx >= 0) arr.splice(idx, 1);
       if (editLine && editLine.draft.id === id) editLine = null;
+      if (directRetEdit && directRetEdit.id === id) directRetEdit = null;
+      if (isVpdd && selVpddId === id) selVpddId = "";
+      if (!isVpdd && selCtId === id) selCtId = "";
       st("Đã xóa dòng xuất nhập kho và tính lại giá vốn.");
+      markDirty(isVpdd ? "vp" : "all");
       saveLocal(); render();
+    }
+
+    function commitDirectRetEdit(advanceNext = false) {
+      if (!directRetEdit) return;
+      const { id, isVp, value } = directRetEdit;
+      const arr = isVp ? LnVPDD : Ln;
+      const line = arr.find(x => x.id === id);
+      if (line) {
+        const raw = String(value ?? "").trim();
+        const numVal = raw === "" ? null : Math.round(Number(raw));
+        line.gi = (numVal !== null && !isNaN(numVal)) ? numVal : null;
+        markDirty(isVp ? "vp" : "all");
+      }
+      pendingRetRecalc = false;
+      if (advanceNext) {
+        const C = isVp ? getVpContext().CVp : getC();
+        const linesSrc = isVp ? getVpContext().vpLines : Ln;
+        const ls = getFilteredCt(isVp, C, linesSrc);
+        const curIdx = ls.findIndex(x => x.id === id);
+        let nextLine = null;
+        for (let i = Math.max(0, curIdx + 1); i < ls.length; i++) {
+          if (!ls[i]._auto && ls[i]._isRet && ls[i].gi == null) { nextLine = ls[i]; break; }
+        }
+        if (!nextLine) {
+          for (let i = 0; i < ls.length; i++) {
+            if (ls[i].id !== id && !ls[i]._auto && ls[i]._isRet && ls[i].gi == null) { nextLine = ls[i]; break; }
+          }
+        }
+        if (!nextLine) {
+          for (let i = Math.max(0, curIdx + 1); i < ls.length; i++) {
+            if (!ls[i]._auto && ls[i]._isRet) { nextLine = ls[i]; break; }
+          }
+        }
+        if (nextLine) {
+          directRetEdit = { id: nextLine.id, isVp, value: nextLine.gi != null ? String(nextLine.gi) : "" };
+          if (isVp) selVpddId = nextLine.id; else selCtId = nextLine.id;
+        } else {
+          directRetEdit = null;
+        }
+      } else {
+        directRetEdit = null;
+      }
+      saveLocal();
+      render();
+    }
+
+    function commitDirectNkNote(key, src, idx, rawValue) {
+      const val = String(rawValue ?? "");
+      if (src === "imp") {
+        if (NKX[idx]) NKX[idx].gc = val;
+      } else {
+        nkNotes[key] = val;
+      }
+      if (_cacheNk) {
+        const hit = _cacheNk.find(r => r.key === key);
+        if (hit) hit.gc = val;
+      }
+      directNkNoteKey = "";
+      saveLocal();
+      render();
     }
 
     function addDm() {
@@ -933,6 +1104,7 @@
         if (idx >= 0) P[idx] = clean;
       }
       st(`${editDm.origMa === null ? "Đã thêm" : "Đã cập nhật"} mặt hàng ${cleanMa}.`);
+      markDirty("all");
       editDm = null; saveLocal(); render();
     }
 
@@ -940,7 +1112,8 @@
       const idx = P.findIndex(p => p.ma === ma);
       if (idx >= 0) P.splice(idx, 1);
       if (editDm && editDm.origMa === ma) editDm = null;
-      st(`Đã xóa mặt hàng ${ma}.`); saveLocal(); render();
+      if (selDmMa === ma) selDmMa = "";
+      st(`Đã xóa mặt hàng ${ma}.`); markDirty("all"); saveLocal(); render();
     }
 
     function startEditTk(ma, isVpdd) {
@@ -962,6 +1135,7 @@
       const ma = editTk.ma, sl = Number(editTk.sl) || 0, gt = Math.round(Number(editTk.gt) || 0);
       if (editTk.isVp) {
         vpddOpening[ma] = { sl, gt };
+        markDirty("vp");
       } else {
         const idx = P.findIndex(p => p.ma === ma);
         if (idx >= 0) {
@@ -970,6 +1144,7 @@
           P[idx].sl = sl;
           P[idx].gt = gt;
         }
+        markDirty("all");
       }
       st(`Đã cập nhật tồn đầu kỳ cho mã ${ma}${editTk.isVp ? " (Kho VPĐD)" : ""}.`);
       editTk = null; saveLocal(); render();
@@ -978,10 +1153,12 @@
     function delTkOpening(ma, isVpdd) {
       if (isVpdd) {
         delete vpddOpening[ma];
+        markDirty("vp");
         st(`Đã xóa tồn đầu kỳ VPĐD của mã ${ma}.`);
       } else {
         const idx = P.findIndex(p => p.ma === ma);
         if (idx >= 0) P.splice(idx, 1);
+        markDirty("all");
         st(`Đã xóa mã hàng ${ma} khỏi danh mục tồn kho.`);
       }
       if (editTk && editTk.ma === ma) editTk = null;
@@ -1021,24 +1198,26 @@
       if (editNk.idx === null) NKX.unshift(clean);
       else if (NKX[editNk.idx]) NKX[editNk.idx] = clean;
       st(`${editNk.idx === null ? "Đã thêm" : "Đã cập nhật"} bút toán Nhật ký chung.`);
+      markDirty("nk");
       editNk = null; saveLocal(); render();
     }
 
     function delNk(idx) {
       if (idx >= 0 && idx < NKX.length) NKX.splice(idx, 1);
       if (editNk && editNk.idx === idx) editNk = null;
-      st("Đã xóa bút toán khỏi Nhật ký chung."); saveLocal(); render();
+      st("Đã xóa bút toán khỏi Nhật ký chung."); markDirty("nk"); saveLocal(); render();
     }
 
     function jumpToKho(ph) {
       ctQ = ph || "";
+      tabPage.ct = 1;
       tab = "ct";
       render();
     }
 
     function jumpToNegProduct(ma, isVpdd) {
-      if (isVpdd) { vpddQ = ma || ""; tab = "ct_vpdd"; }
-      else { ctQ = ma || ""; tab = "ct"; }
+      if (isVpdd) { vpddQ = ma || ""; tabPage.ct_vpdd = 1; tab = "ct_vpdd"; }
+      else { ctQ = ma || ""; tabPage.ct = 1; tab = "ct"; }
       render();
     }
 
@@ -1127,6 +1306,8 @@
       const idx = A.findIndex(x => x.ma === ma);
       if (idx >= 0) A.splice(idx, 1);
       if (editPartner && editPartner.origMa === ma) editPartner = null;
+      if (kind === "kh" && selKhMa === ma) selKhMa = "";
+      if (kind === "ncc" && selNccMa === ma) selNccMa = "";
       st(`Đã xóa ${kind === "kh" ? "khách hàng" : "nhà cung cấp"} ${ma}.`); saveLocal(); render();
     }
 
@@ -1135,6 +1316,7 @@
       if (!clean || P.some(p => p.ma === clean)) return;
       P.push({ ma: clean, ten: `Hàng hóa ${clean}`, dvt: "Cái", sl: 0, gt: 0 });
       st(`Đã thêm nhanh mã hàng "${clean}" vào Danh mục hàng hóa.`);
+      markDirty("all");
       saveLocal(); render();
     }
 
@@ -1151,6 +1333,7 @@
     }
 
     function buildNkRows(C) {
+      if (!_dirtyNk && _cacheNk) return _cacheNk;
       const auto = nkG(C).map(({ l, s }) => {
         const key = `kho|${l.ph}|${l.kh}|${l.ngay}`;
         return {
@@ -1163,7 +1346,9 @@
         key: `imp|${idx}|${x.ph}|${x.ngay}`, ngay: x.ngay, ph: x.ph, hd: x.hd, nd: x.nd, no: x.no, co: x.co,
         s: Math.round(x.tien || 0), kh: x.kh, gc: x.gc || "", src: "imp", idx
       }));
-      return auto.concat(imp).sort((a, b) => a.ngay < b.ngay ? -1 : a.ngay > b.ngay ? 1 : 0);
+      _cacheNk = auto.concat(imp).sort((a, b) => a.ngay < b.ngay ? -1 : a.ngay > b.ngay ? 1 : 0);
+      _dirtyNk = false;
+      return _cacheNk;
     }
 
     function buildCdsps(cir, nkRows, Y, per) {
@@ -1302,10 +1487,108 @@
         l._retWarn = C.retWarns.get(l) || "";
         if (onlyErr && !l._err) return false;
         if (onlyRet && !l._retWarn) return false;
-        if (q && !(l.ph + l.ma + l.kh + l.nd + l.no + l.co).toLowerCase().includes(q)) return false;
+        if (q && !(l.ph + " " + l.ma + " " + l.kh + " " + l.nd + " " + l.no + " " + l.co).toLowerCase().includes(q)) return false;
         return matchesPer(l.ngay, per);
       });
-      return applySort(ls, sortObj, errTop);
+      return applySort(ls, sortObj, errTop, C.pm);
+    }
+
+    function pagerHtml(tabKey, totalRows) {
+      const totalPages = Math.max(1, Math.ceil(totalRows / PAGE_SIZE));
+      if (tabPage[tabKey] > totalPages) tabPage[tabKey] = totalPages;
+      if (tabPage[tabKey] < 1) tabPage[tabKey] = 1;
+      const cur = tabPage[tabKey];
+      if (totalRows <= PAGE_SIZE) return { cur, slice: [0, totalRows], html: "" };
+      const start = (cur - 1) * PAGE_SIZE, end = Math.min(totalRows, start + PAGE_SIZE);
+      return {
+        cur,
+        slice: [start, end],
+        html: `<div class="pager noprint">
+          <span>Hiển thị <b>${start + 1}–${end}</b> / <b>${totalRows}</b> dòng</span>
+          <div class="pager-btns">
+            <button class="s" data-pgk="${tabKey}" data-pg="1" ${cur <= 1 ? "disabled" : ""}>«</button>
+            <button class="s" data-pgk="${tabKey}" data-pg="${cur - 1}" ${cur <= 1 ? "disabled" : ""}>‹ Trước</button>
+            <span>Trang <b>${cur}</b>/${totalPages}</span>
+            <button class="s" data-pgk="${tabKey}" data-pg="${cur + 1}" ${cur >= totalPages ? "disabled" : ""}>Sau ›</button>
+            <button class="s" data-pgk="${tabKey}" data-pg="${totalPages}" ${cur >= totalPages ? "disabled" : ""}>»</button>
+          </div>
+        </div>`
+      };
+    }
+
+    function openBulkModal(isVpdd) {
+      const C = isVpdd ? getVpContext().CVp : getC();
+      const linesSrc = isVpdd ? getVpContext().vpLines : Ln;
+      const filtered = getFilteredCt(isVpdd, C, linesSrc).filter(l => !l._auto);
+      const retUnpriced = filtered.filter(l => l._isRet && l.gi == null);
+      const retAll = filtered.filter(l => l._isRet);
+      $("#mdl").innerHTML = `<div class="modal-bg"><div class="modal" style="max-width:560px">
+        <h3>⚡ Sửa hàng loạt (${isVpdd ? "Kho VPĐD 1368" : "Xuất Nhập kho"})</h3>
+        <p class="m" style="margin:0 0 12px">Đang lọc <b>${filtered.length}</b> dòng · Có <b>${retAll.length}</b> dòng xuất âm trả hàng (<b>${retUnpriced.length}</b> dòng chưa có giá).</p>
+        <div style="display:grid;grid-template-columns:150px 1fr;gap:8px;align-items:center">
+          <label>Phạm vi áp dụng</label>
+          <select id="bkScope">
+            <option value="ret_need">Phiếu xuất âm CHƯA có đơn giá (${retUnpriced.length} dòng)</option>
+            <option value="ret_all">TẤT CẢ phiếu xuất âm đang lọc (${retAll.length} dòng)</option>
+            <option value="all">Toàn bộ dòng đang lọc (${filtered.length} dòng)</option>
+          </select>
+          <label>Đơn giá xuất (Gán)</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input id="bkGi" type="number" placeholder="Nhập đơn giá (bỏ trống = giữ nguyên)" style="flex:1">
+            <button type="button" class="s" id="bkAutoAvg" title="Tự lấy giá tồn đầu/bình quân theo từng mã hàng">Lấy giá ĐK/BQ</button>
+          </div>
+          <label>TK Nợ mới</label>
+          <input id="bkNo" placeholder="Bỏ trống nếu không đổi">
+          <label>TK Có mới</label>
+          <input id="bkCo" placeholder="Bỏ trống nếu không đổi">
+          <label>Nội dung mới</label>
+          <input id="bkNd" placeholder="Bỏ trống nếu không đổi">
+        </div>
+        <div class="modal-actions">
+          <button class="s" onclick="document.getElementById('mdl').innerHTML=''">Hủy</button>
+          <button id="bkApply">Áp dụng hàng loạt</button>
+        </div>
+      </div></div>`;
+      $("#bkAutoAvg").onclick = () => {
+        const sc = $("#bkScope").value;
+        const targets = sc === "ret_need" ? retUnpriced : sc === "ret_all" ? retAll : filtered;
+        let cnt = 0;
+        targets.forEach(l => {
+          const pmObj = C.pm.get(l.ma);
+          const m = l._m || C.U || 1;
+          const mInfo = (C.M[l.ma] && C.M[l.ma][m]) || null;
+          const avg = (mInfo && mInfo.pr > 0) ? mInfo.pr : (pmObj && pmObj.sl > 0 ? Math.round(pmObj.gt / pmObj.sl) : 0);
+          if (avg > 0) { l.gi = avg; cnt++; }
+        });
+        $("#mdl").innerHTML = "";
+        markDirty(isVpdd ? "vp" : "all");
+        pendingRetRecalc = false;
+        st(`Đã tự điền đơn giá bình quân/đầu kỳ cho ${cnt}/${targets.length} dòng.`);
+        saveLocal(); render();
+      };
+      $("#bkApply").onclick = () => {
+        const sc = $("#bkScope").value;
+        const targets = sc === "ret_need" ? retUnpriced : sc === "ret_all" ? retAll : filtered;
+        const giRaw = $("#bkGi").value.trim();
+        const noRaw = $("#bkNo").value.trim();
+        const coRaw = $("#bkCo").value.trim();
+        const ndRaw = $("#bkNd").value.trim();
+        if (!giRaw && !noRaw && !coRaw && !ndRaw) {
+          $("#mdl").innerHTML = ""; return;
+        }
+        const giVal = giRaw === "" ? undefined : Math.round(Number(giRaw));
+        targets.forEach(l => {
+          if (giVal !== undefined && !isNaN(giVal)) l.gi = giVal;
+          if (noRaw) l.no = noRaw;
+          if (coRaw) l.co = coRaw;
+          if (ndRaw) l.nd = ndRaw;
+        });
+        $("#mdl").innerHTML = "";
+        markDirty(isVpdd ? "vp" : "all");
+        pendingRetRecalc = false;
+        st(`Đã cập nhật hàng loạt ${targets.length} dòng và tính lại giá vốn.`);
+        saveLocal(); render();
+      };
     }
 
     function computeTkSummary(isVpdd, C, prodsSrc, linesSrc, qStr = "", negFirst = true, onlyNeg = false) {
@@ -1453,9 +1736,10 @@
 
     function buildCtAoa(isVpdd, C, linesSrc, prodsSrc) {
       const ls = getFilteredCt(isVpdd, C, linesSrc);
+      const pm = C.pm || new Map(prodsSrc.map(x => [x.ma, x]));
       let sSN = 0, sGN = 0, sSX = 0, sGX = 0;
       const body = ls.map(l => {
-        const p = prodsSrc.find(x => x.ma === l.ma) || {};
+        const p = pm.get(l.ma) || {};
         sSN += l.sn || 0; sGN += l.gtn || 0; sSX += l.sx || 0; sGX += l.gx || 0;
         const chk = [l._err, l._retWarn].filter(Boolean).join("; ");
         return [
@@ -1504,12 +1788,15 @@
     }
 
     function expTab(t) {
-      const C = calcSet(P, Ln), vpProds = getVpddProducts(), vpLines = getVpddLines(), CVp = calcSet(vpProds, vpLines), Y = C.Y;
+      const C = getC(), Y = C.Y;
       if (t === "dm") expSheets([{ name: "Danh muc hang hoa", aoa: buildDmAoa(Y) }], `danh-muc-hang-hoa-${Y}.xlsx`);
       else if (t === "tk") expSheets([{ name: "Ton kho Tong hop", aoa: buildTkAoa(false, C, P, Ln) }], `tong-hop-ton-kho-${Y}.xlsx`);
-      else if (t === "tk_vpdd") expSheets([{ name: "Ton kho VPDD", aoa: buildTkAoa(true, CVp, vpProds, vpLines) }], `tong-hop-ton-kho-vpdd-${Y}.xlsx`);
       else if (t === "ct") expSheets([{ name: "Xuat Nhap kho", aoa: buildCtAoa(false, C, Ln, P) }], `xuat-nhap-kho-${Y}.xlsx`);
-      else if (t === "ct_vpdd") expSheets([{ name: "Xuat Nhap VPDD", aoa: buildCtAoa(true, CVp, vpLines, vpProds) }], `xuat-nhap-kho-vpdd-${Y}.xlsx`);
+      else if (t === "tk_vpdd" || t === "ct_vpdd") {
+        const { vpProds, vpLines, CVp } = getVpContext();
+        if (t === "tk_vpdd") expSheets([{ name: "Ton kho VPDD", aoa: buildTkAoa(true, CVp, vpProds, vpLines) }], `tong-hop-ton-kho-vpdd-${Y}.xlsx`);
+        else expSheets([{ name: "Xuat Nhap VPDD", aoa: buildCtAoa(true, CVp, vpLines, vpProds) }], `xuat-nhap-kho-vpdd-${Y}.xlsx`);
+      }
       else if (t === "nk") expSheets([{ name: "Nhat ky chung", aoa: buildNkAoa(C, true) }], `nhat-ky-chung-${Y}.xlsx`);
       else if (t === "kh") expSheets([{ name: "Khach hang", aoa: buildPartnerAoa("kh", C, true) }], `cong-no-khach-hang-${Y}.xlsx`);
       else if (t === "ncc") expSheets([{ name: "Nha cung cap", aoa: buildPartnerAoa("ncc", C, true) }], `cong-no-nha-cung-cap-${Y}.xlsx`);
@@ -1518,7 +1805,7 @@
     }
 
     function expAll() {
-      const C = calcSet(P, Ln), vpProds = getVpddProducts(), vpLines = getVpddLines(), CVp = calcSet(vpProds, vpLines), Y = C.Y;
+      const { C, vpProds, vpLines, CVp } = getVpContext(), Y = C.Y;
       const nkRows = buildNkRows(C);
       const { rows, tot } = buildCdsps(cdspsCir, nkRows, Y, cdspsPer);
       expSheets([
@@ -1724,77 +2011,112 @@
       XLSX.writeFile(wb, `so-s38-dn-tk-${s.activeTk}.xlsx`);
     }
 
-    function renderCtEditRow(d, isVpdd) {
-      return `<tr style="background:var(--warn)">
-        <td class="noprint"><button style="padding:2px 6px" onclick="saveEditLine()">Lưu</button> <button class="s" style="padding:2px 6px" onclick="editLine=null;render()">Hủy</button></td>
-        <td><input data-ed="ph" value="${esc(d.ph)}" style="width:90px"></td>
+    function renderCtEditRow(d, isVpdd, pm, compactCols = false) {
+      const pInfo = (pm && pm.get(d.ma)) || {};
+      const gxPrev = d.sx != null && d.gi != null ? fmt(Math.round(d.sx * d.gi)) : "";
+      return `<tr class="ed-row" style="background:var(--warn)" data-edkind="ct">
+        <td><input data-ed="ph" value="${esc(d.ph)}"></td>
         <td><input type="date" data-ed="ngay" value="${esc(d.ngay)}"></td>
-        <td><input data-ed="hd" value="${esc(d.hd)}" style="width:76px"></td>
-        <td><input data-ed="kh" value="${esc(d.kh)}" style="width:76px"></td>
-        <td><input data-ed="no" value="${esc(d.no)}" style="width:52px"></td>
-        <td><input data-ed="co" value="${esc(d.co)}" style="width:52px"></td>
-        <td><input data-ed="nd" value="${esc(d.nd)}" style="width:150px"></td>
-        <td><input list="dmList" data-ed="ma" value="${esc(d.ma)}" style="width:92px"></td>
-        <td>${esc((P.find(x => x.ma === d.ma) || {}).ten || "—")}</td>
-        <td>${esc((P.find(x => x.ma === d.ma) || {}).dvt || "—")}</td>
-        <td><input type="number" data-ed="sn" value="${d.sn ?? ""}" style="width:68px"></td>
-        <td><input type="number" data-ed="gn" value="${d.gn ?? ""}" style="width:82px"></td>
+        ${!compactCols ? `<td><input data-ed="hd" value="${esc(d.hd)}"></td><td><input data-ed="kh" value="${esc(d.kh)}"></td><td><input data-ed="no" value="${esc(d.no)}"></td><td><input data-ed="co" value="${esc(d.co)}"></td>` : ""}
+        <td><input data-ed="nd" value="${esc(d.nd)}"></td>
+        <td><input list="dmList" data-ed="ma" value="${esc(d.ma)}"></td>
+        <td>${esc(pInfo.ten || "—")}</td>
+        ${!compactCols ? `<td>${esc(pInfo.dvt || "—")}</td>` : ""}
+        <td><input type="number" data-ed="sn" value="${d.sn ?? ""}"></td>
+        <td><input type="number" data-ed="gn" value="${d.gn ?? ""}"></td>
         <td class=n>${d.sn != null ? fmt(Math.round(d.sn * (d.gn || 0))) : ""}</td>
-        <td><input type="number" data-ed="sx" value="${d.sx ?? ""}" style="width:68px"></td>
-        <td><input type="number" data-ed="gi" value="${d.gi ?? ""}" style="width:82px" placeholder="Tự tính"></td>
-        <td></td><td>${editLine.isNew ? "Dòng mới..." : "Đang sửa..."}</td></tr>`;
+        <td><input type="number" data-ed="sx" value="${d.sx ?? ""}"></td>
+        <td><input type="number" data-ed="gi" value="${d.gi ?? ""}" placeholder="Tự tính"></td>
+        <td class=n>${gxPrev}</td></tr>`;
     }
 
     function renderCtView(isVpdd, C, linesSrc, prodsSrc) {
       const qVal = isVpdd ? vpddQ : ctQ, per = isVpdd ? vpddPer : ctPer, sortObj = isVpdd ? vpddSort : ctSort;
       const errTop = isVpdd ? vpddErrTop : ctErrTop, onlyErr = isVpdd ? vpddOnlyErr : ctOnlyErr, onlyRet = isVpdd ? vpddOnlyRet : ctOnlyRet;
+      const ndCompact = isVpdd ? vpddNdCompact : ctNdCompact;
+      const compactCols = isVpdd ? vpddCompactCols : ctCompactCols;
+      const selId = isVpdd ? selVpddId : selCtId;
       const q = qVal.trim().toLowerCase();
       const ls = getFilteredCt(isVpdd, C, linesSrc);
+      const pm = C.pm || new Map(prodsSrc.map(x => [x.ma, x]));
 
       let sSN = 0, sGN = 0, sSX = 0, sGX = 0;
-      const newRowHtml = (editLine && editLine.isVp === isVpdd && editLine.isNew) ? renderCtEditRow(editLine.draft, isVpdd) : "";
-      const rows = ls.slice(0, 800).map(l => {
-        const p = prodsSrc.find(x => x.ma === l.ma) || {}, e = l._err, rw = l._retWarn, gxVal = l.gx != null ? l.gx : "";
+      for (let i = 0; i < ls.length; i++) {
+        const l = ls[i];
         sSN += l.sn || 0; sGN += l.gtn || 0; sSX += l.sx || 0; sGX += l.gx || 0;
+      }
 
+      const selLine = ls.find(l => l.id === selId) || null;
+      const tabKey = isVpdd ? "ct_vpdd" : "ct";
+      const pg = pagerHtml(tabKey, ls.length);
+      const newRowHtml = (editLine && editLine.isVp === isVpdd && editLine.isNew) ? renderCtEditRow(editLine.draft, isVpdd, pm, compactCols) : "";
+      const rows = ls.slice(pg.slice[0], pg.slice[1]).map(l => {
+        const p = pm.get(l.ma) || {}, e = l._err, rw = l._retWarn, gxVal = l.gx != null ? l.gx : "";
         if (editLine && !editLine.isNew && editLine.isVp === isVpdd && editLine.draft.id === l.id && !l._auto) {
-          return renderCtEditRow(editLine.draft, isVpdd);
+          return renderCtEditRow(editLine.draft, isVpdd, pm, compactCols);
         }
 
-        const rowCls = rw ? "ret" : e ? "er" : (l._isRet ? "ret-ok" : (!isVpdd && isBranch1368(l) ? "br" : ""));
-        const editCell = !l._auto
-          ? `<button class="${e ? "d" : "s"}" style="padding:2px 6px" onclick="event.stopPropagation();startEditLine('${esc(l.id)}',${isVpdd})">Sửa</button> <button class="s" style="padding:2px 6px;color:#dc2626" onclick="event.stopPropagation();delInvLine('${esc(l.id)}',${isVpdd})" title="Xóa dòng">Xóa</button>`
-          : `<span class="m">Auto</span>`;
-        const quickAdd = (e === "Mã hàng chưa có trong danh mục" && String(l.ma || "").trim())
-          ? ` <button class="noprint" style="padding:1px 6px;font-size:11px" onclick="event.stopPropagation();quickAddProduct('${esc(l.ma)}')">+ Thêm vào DM</button>` : "";
-        const retAct = rw
-          ? ` <button class="noprint" style="padding:1px 6px;font-size:11px;background:#0284c7;border-color:#0284c7" onclick="event.stopPropagation();startEditLine('${esc(l.id)}',${isVpdd})">Nhập giá</button>`
-          : (!e && l._isRet ? ` <span style="color:#0369a1;font-size:13px">Hàng khách trả lại</span>` : "");
-        const checkHtml = `${e ? `<span>${esc(e)}</span>` : ""}${quickAdd}${rw ? `${e ? " · " : ""}<b>${esc(rw)}</b>` : ""}${retAct}`;
-        return `<tr class="${rowCls}" ${!l._auto ? `data-edit-ct="${esc(l.id)}" data-vp="${isVpdd ? 1 : 0}" style="cursor:pointer" title="Click vào dòng để sửa"` : ""}><td class="noprint">${editCell}</td><td>${esc(l.ph)}</td><td>${dr(l.ngay)}</td><td>${esc(l.hd)}</td><td>${esc(l.kh)}</td><td>${esc(l.no)}</td><td>${esc(l.co)}</td><td>${esc(l.nd)}</td><td>${esc(l.ma)}</td><td>${esc(p.ten)}</td><td>${esc(p.dvt)}</td><td class=n>${fmt(l.sn)}</td><td class=n>${fmt(l.gn)}</td><td class=n>${fmt(l.gtn)}</td><td class=n>${fmt(l.sx)}</td><td class=n>${l.px == null ? "" : fmt(l.px)}</td><td class=n>${fmt(gxVal)}</td><td>${checkHtml}</td></tr>`;
+        const isSel = selId === l.id;
+        const baseCls = rw ? "ret" : e ? "er" : (l._isRet ? "ret-ok" : (!isVpdd && isBranch1368(l) ? "br" : ""));
+        const rowCls = [baseCls, isSel ? "sel" : ""].filter(Boolean).join(" ");
+        const isDirectRet = !l._auto && l._isRet && directRetEdit && directRetEdit.isVp === isVpdd && directRetEdit.id === l.id;
+        const pxCell = isDirectRet
+          ? `<td class="n" onclick="event.stopPropagation()"><input id="retDirectInp" type="number" class="ret-gi-inp ${l.gi == null ? "need" : "ok"}" data-ret-direct-id="${esc(l.id)}" data-vp="${isVpdd ? 1 : 0}" value="${esc(directRetEdit.value)}" placeholder="Nhập giá..."></td>`
+          : (!l._auto && l._isRet)
+            ? `<td class="n" data-ret-cell="${esc(l.id)}" data-vp="${isVpdd ? 1 : 0}" title="Nhấp đúp để nhập đơn giá trả hàng">${l.px != null ? fmt(l.px) : `<span class="ret-direct-hint noprint">Nhấp đúp nhập giá</span>`}</td>`
+            : `<td class="n">${l.px == null ? "" : fmt(l.px)}</td>`;
+
+        const rowHint = l._auto ? "Dòng tự động chuyển kho VPĐD" : (l._isRet ? "Nhấp chọn · Nhấp đúp ô Xuất ĐG hoặc dòng để nhập giá trực tiếp" : "Nhấp chọn để Sửa/Xóa trên thanh trên · Nhấp đúp để sửa");
+        return `<tr class="${rowCls}" data-sel-ct="${esc(l.id)}" data-ph="${esc(l.ph)}" data-ma="${esc(l.ma)}" data-auto="${l._auto ? 1 : 0}" data-ret="${l._isRet ? 1 : 0}" data-vp="${isVpdd ? 1 : 0}" style="cursor:pointer" title="${rowHint}"><td>${esc(l.ph)}</td><td>${dr(l.ngay)}</td>${!compactCols ? `<td>${esc(l.hd)}</td><td>${esc(l.kh)}</td><td>${esc(l.no)}</td><td>${esc(l.co)}</td>` : ""}<td class="nd-cell ${ndCompact ? "compact" : ""}" title="${esc(l.nd)}">${esc(l.nd)}</td><td>${esc(l.ma)}</td><td>${esc(p.ten)}</td>${!compactCols ? `<td>${esc(p.dvt)}</td>` : ""}<td class=n>${fmt(l.sn)}</td><td class=n>${fmt(l.gn)}</td><td class=n>${fmt(l.gtn)}</td><td class=n>${fmt(l.sx)}</td>${pxCell}<td class="n ret-gx-cell">${fmt(gxVal)}</td></tr>`;
       }).join("");
 
-      const cols = [
+      const allCols = [
         ["ph", "Mã phiếu", 0], ["ngay", "Ngày", 0], ["hd", "Số HĐ", 0], ["kh", "KH/NCC", 0],
         ["no", "Nợ", 0], ["co", "Có", 0], ["nd", "Nội dung", 0], ["ma", "Mã hàng", 0],
         ["ten", "Tên hàng", 0], ["dvt", "ĐVT", 0],
         ["sn", "Nhập SL", 1], ["gn", "Nhập ĐG", 1], ["gtn", "Nhập GT", 1],
-        ["sx", "Xuất SL", 1], ["px", "Xuất ĐG", 1], ["gx", "Xuất GT", 1], ["err", "Kiểm tra", 0]
+        ["sx", "Xuất SL", 1], ["px", "Xuất ĐG", 1], ["gx", "Xuất GT", 1]
       ];
-      const thHtml = `<tr><th class="noprint">Thao tác</th>` + cols.map(([k, lbl, isN]) => {
+      const hiddenInCompact = new Set(["hd", "kh", "no", "co", "dvt"]);
+      const cols = compactCols ? allCols.filter(([k]) => !hiddenInCompact.has(k)) : allCols;
+      const thHtml = `<tr>` + cols.map(([k, lbl, isN]) => {
         const ind = sortObj.k === k ? (sortObj.d === 1 ? " ▲" : " ▼") : " ⇅";
-        return `<th class="sort ${isN ? "n" : ""}" data-sk="${k}" data-vp="${isVpdd ? 1 : 0}" title="Bấm để sắp xếp">${lbl}<span style="opacity:.6;font-size:10px">${ind}</span></th>`;
+        const ndTog = k === "nd" ? `<button type="button" class="nd-toggle noprint" data-nd-tog="${isVpdd ? "vp" : "ct"}" onclick="event.stopPropagation()">${ndCompact ? "Mở" : "Thu gọn"}</button>` : "";
+        return `<th class="sort ${isN ? "n" : ""}" data-sk="${k}" data-vp="${isVpdd ? 1 : 0}" title="Bấm để sắp xếp">${lbl}<span style="opacity:.6;font-size:10px">${ind}</span>${ndTog}</th>`;
       }).join("") + "</tr>";
+      const colWidths = compactCols
+        ? (ndCompact
+            ? ["8%", "7%", "6.5%", "7.5%", "26%", "6%", "7%", "8.5%", "6%", "8%", "9.5%"]
+            : ["8%", "7%", "16%", "7.5%", "16.5%", "6%", "7%", "8.5%", "6%", "8%", "9.5%"])
+        : (ndCompact
+            ? ["6%", "5.5%", "4.5%", "5%", "3.5%", "3.5%", "5.5%", "5.5%", "21%", "3.5%", "4.5%", "5.5%", "6.5%", "4.5%", "6.5%", "9%"]
+            : ["6%", "5.5%", "4.5%", "5%", "3.5%", "3.5%", "13%", "5.5%", "13.5%", "3.5%", "4.5%", "5.5%", "6.5%", "4.5%", "6.5%", "9%"]);
+      const colgroupHtml = `<colgroup>${colWidths.map(w => `<col style="width:${w}">`).join("")}</colgroup>`;
 
       const ps = (q || per.t !== "Tất cả") ? [...new Set(ls.map(l => l.ph))].filter(Boolean).slice(0, 50) : [];
       const pfx = isVpdd ? "vp" : "ct";
       const ec = C.errs.size, rc = C.retWarns.size;
-      const retBanner = rc > 0
-        ? `<div class="st bl noprint"><span><b>Yêu cầu nhập giá cho hàng hóa khách hàng trả lại</b> — Có <b>${rc}</b> dòng phiếu xuất âm số lượng chưa có đơn giá (tô xanh, đẩy lên đầu bảng).</span><button class="s" style="padding:2px 8px" onclick="${isVpdd ? "vpddOnlyRet=!vpddOnlyRet" : "ctOnlyRet=!ctOnlyRet"};render()">${onlyRet ? "Hiện tất cả dòng" : "Chỉ xem dòng trả hàng"}</button></div>`
+      const errLines = ls.filter(l => l._err);
+      const focusErrLine = (selLine && selLine._err) ? selLine : (errLines[0] || null);
+      const focusMissingMa = (focusErrLine && focusErrLine._err === "Mã hàng chưa có trong danh mục" && String(focusErrLine.ma || "").trim())
+        ? String(focusErrLine.ma).trim()
         : "";
+      const errBanner = ec > 0
+        ? `<div class="st er noprint"><span><b>Lỗi dữ liệu (${ec} dòng):</b> ${focusErrLine ? `${focusErrLine.ph ? `Phiếu <b>${esc(focusErrLine.ph)}</b> · ` : ""}${focusErrLine.ma ? `Mã <b>${esc(focusErrLine.ma)}</b> · ` : ""}${esc(focusErrLine._err)}` : "Có dòng thiếu thông tin hoặc mã hàng chưa có trong danh mục."}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${focusMissingMa ? `<button class="s" style="padding:2px 8px" onclick="quickAddProduct('${esc(focusMissingMa)}')">+ Thêm DM (${esc(focusMissingMa)})</button>` : ""}<button class="s" style="padding:2px 8px" onclick="${isVpdd ? "vpddOnlyErr=!vpddOnlyErr" : "ctOnlyErr=!ctOnlyErr"};tabPage['${tabKey}']=1;render()">${onlyErr ? "Hiện tất cả" : "Chỉ xem dòng lỗi"}</button></div></div>`
+        : "";
+      const retBanner = rc > 0
+        ? `<div class="st bl noprint"><span><b>Yêu cầu nhập giá cho hàng hóa khách hàng trả lại</b> — Có <b>${rc}</b> dòng xuất âm chưa có đơn giá (nhấp đúp vào dòng hoặc ô <b>Xuất ĐG</b> để nhập trực tiếp, hoặc bấm <b>Sửa hàng loạt</b>).</span><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="s" style="padding:2px 8px" onclick="openBulkModal(${isVpdd})">⚡ Sửa hàng loạt</button><button class="s" style="padding:2px 8px" onclick="${isVpdd ? "vpddOnlyRet=!vpddOnlyRet" : "ctOnlyRet=!ctOnlyRet"};tabPage['${tabKey}']=1;render()">${onlyRet ? "Hiện tất cả" : "Chỉ xem trả hàng"}</button></div></div>`
+        : "";
+      const topRowBtns = (editLine && editLine.isVp === isVpdd)
+        ? `<button onclick="saveEditLine()">💾 Lưu dòng</button><button class="s" onclick="editLine=null;render()">✕ Hủy</button>`
+        : (selLine && !selLine._auto)
+          ? `<button onclick="startEditLine('${esc(selLine.id)}',${isVpdd})">✎ Sửa (${esc(selLine.ph || selLine.ma || "dòng")})</button><button class="s" style="color:#dc2626" onclick="delInvLine('${esc(selLine.id)}',${isVpdd})">🗑 Xóa</button>`
+          : "";
       return `<datalist id="dmList">${P.map(p => `<option value="${esc(p.ma)}">${esc(p.ten)}</option>`).join("")}</datalist>
               <div class="bar">${upl(isVpdd ? "ct_vpdd" : "ct")}<button class="s" onclick="tpl('${isVpdd ? "ct_vpdd" : "ct"}')">📄 Tải file mẫu</button>
               <button onclick="addInvLine(${isVpdd})">+ Thêm dòng</button>
+              <span id="topActSlot" style="display:inline-flex;gap:6px;align-items:center">${topRowBtns}</span>
+              <button class="s" onclick="openBulkModal(${isVpdd})">⚡ Sửa hàng loạt</button>
               <button class="s" onclick="expTab('${isVpdd ? "ct_vpdd" : "ct"}')">⬇ Xuất Excel</button>
               <input id="${pfx}Q" placeholder="Lọc phiếu / mã hàng / TK" value="${esc(qVal)}">
               <span>Kỳ:</span>
@@ -1802,46 +2124,66 @@
               ${per.t === "Tháng" ? `<select id="${pfx}Pk">${Array.from({ length: 12 }, (_, i) => i + 1).map(m => `<option value="${m}" ${m === per.k ? "selected" : ""}>Tháng ${String(m).padStart(2, "0")}</option>`).join("")}</select>` : ""}
               ${per.t === "Quý" ? `<select id="${pfx}Pk">${[1, 2, 3, 4].map(q => `<option value="${q}" ${q === per.k ? "selected" : ""}>Quý ${q}</option>`).join("")}</select>` : ""}
               ${per.t !== "Tất cả" ? `<input id="${pfx}Py" type="number" value="${per.y}">` : ""}
+              <button class="s ${compactCols ? "on" : ""}" onclick="${isVpdd ? "vpddCompactCols=!vpddCompactCols" : "ctCompactCols=!ctCompactCols"};render()" title="Ẩn/hiện cột phụ (Số HĐ, KH/NCC, Nợ, Có, ĐVT)">${compactCols ? "Hiện đủ cột" : "Thu gọn cột"}</button>
               <button class="s" onclick="prn(${isVpdd})">🖨 In phiếu</button>
               <label style="margin-left:auto"><input id="${pfx}ErrTop" type="checkbox" ${errTop ? "checked" : ""}> Đẩy lỗi lên đầu</label>
               ${rc > 0 ? `<button id="${pfx}OnlyRet" class="s ret-btn ${onlyRet ? "on" : ""}" title="Bấm để lọc riêng phiếu trả hàng chưa nhập giá">${onlyRet ? `Đang lọc ${rc} trả hàng (Tắt)` : `↩ ${rc} trả hàng cần giá`}</button>` : ""}
               <button id="${pfx}OnlyErr" class="s err-btn ${onlyErr ? "on" : ""}" title="Bấm để lọc riêng các dòng lỗi">${onlyErr ? `Đang lọc ${ec} lỗi (Tắt)` : `⚠ ${ec} lỗi`}</button>
               <span class="m">${ls.length}/${linesSrc.length} dòng</span></div>
-              ${retBanner}
-              <div class="w"><table><thead>${thHtml}</thead><tbody>${newRowHtml}${rows}</tbody><tfoot><tr><td class="noprint"></td><td colspan=10>CỘNG KỲ ĐANG LỌC (${ls.length} dòng)</td><td class=n>${fmt(sSN)}</td><td></td><td class=n>${fmt(sGN)}</td><td class=n>${fmt(sSX)}</td><td></td><td class=n>${fmt(sGX)}</td><td></td></tr></tfoot></table></div>
+              ${errBanner}${retBanner}
+              <div class="w"><table>${colgroupHtml}<thead>${thHtml}</thead><tbody>${newRowHtml}${rows}</tbody><tfoot><tr><td colspan=${compactCols ? 5 : 10}>CỘNG KỲ ĐANG LỌC (${ls.length} dòng)</td><td class=n>${fmt(sSN)}</td><td></td><td class=n>${fmt(sGN)}</td><td class=n>${fmt(sSX)}</td><td></td><td class=n>${fmt(sGX)}</td></tr></tfoot></table></div>
+              ${pg.html}
               <div class="pvs">${ps.map(x => vch(x, linesSrc, prodsSrc)).join("")}</div>`;
     }
 
     function renderTkView(isVpdd, C, prodsSrc, linesSrc) {
       const qVal = isVpdd ? tkVpQ : tkQ;
       const negTop = isVpdd ? tkVpNegTop : tkNegTop, onlyNeg = isVpdd ? tkVpOnlyNeg : tkOnlyNeg;
-      const { a, b, per, list, rows: sumRows, T, negCount } = computeTkSummary(isVpdd, C, prodsSrc, linesSrc, qVal, negTop, onlyNeg);
+      const compactCols = isVpdd ? tkVpddCompactCols : tkCompactCols;
+      const { b, per, list, rows: sumRows, T, negCount } = computeTkSummary(isVpdd, C, prodsSrc, linesSrc, qVal, negTop, onlyNeg);
       let sel = isVpdd ? scVpddMa : scMa;
       if (!sel && list[0]) { sel = list[0].ma; if (isVpdd) scVpddMa = sel; else scMa = sel; }
+      const selRow = sumRows.find(r => r.ma === sel) || null;
+      const negRows = sumRows.filter(r => r.isNegative);
+      const focusNeg = (selRow && selRow.isNegative) ? selRow : (negRows[0] || null);
 
-      const rows = sumRows.map(r => {
+      const tabKey = isVpdd ? "tk_vpdd" : "tk";
+      const pg = pagerHtml(tabKey, sumRows.length);
+      const rows = sumRows.slice(pg.slice[0], pg.slice[1]).map(r => {
         if (editTk && editTk.isVp === isVpdd && editTk.ma === r.ma) {
-          return `<tr style="background:var(--warn)">
+          return `<tr class="ed-row" style="background:var(--warn)" data-edkind="tk">
             <td><b>${esc(r.ma)}</b></td>
-            <td>${isVpdd ? esc(r.ten) : `<input data-etk="ten" value="${esc(editTk.ten)}" style="width:180px">`}</td>
-            <td>${isVpdd ? esc(r.dvt) : `<input data-etk="dvt" value="${esc(editTk.dvt)}" style="width:68px">`}</td>
-            <td><input type="number" data-etk="sl" value="${editTk.sl}" style="width:74px;text-align:right"></td>
-            <td class=n>${fmt(editTk.sl ? Math.round(editTk.gt / editTk.sl) : 0)}</td>
-            <td><input type="number" data-etk="gt" value="${editTk.gt}" style="width:104px;text-align:right"></td>
+            <td>${isVpdd ? esc(r.ten) : `<input data-etk="ten" value="${esc(editTk.ten)}">`}</td>
+            ${!compactCols ? `<td>${isVpdd ? esc(r.dvt) : `<input data-etk="dvt" value="${esc(editTk.dvt)}">`}</td>` : ""}
+            <td><input type="number" data-etk="sl" value="${editTk.sl}" style="text-align:right"></td>
+            ${!compactCols ? `<td class=n>${fmt(editTk.sl ? Math.round(editTk.gt / editTk.sl) : 0)}</td>` : ""}
+            <td><input type="number" data-etk="gt" value="${editTk.gt}" style="text-align:right"></td>
             <td class=n>${fmt(r.nS)}</td><td class=n>${fmt(r.nG)}</td><td class=n>${fmt(r.xS)}</td><td class=n>${fmt(r.xG)}</td>
-            <td class="n${r.cS < 0 ? " neg" : ""}">${fmt(r.cS)}</td><td class=n>${fmt(r.cDG)}</td><td class="n${r.cG < 0 ? " neg" : ""}">${fmt(r.cG)}</td>
-            <td class="noprint"><button style="padding:2px 6px" onclick="event.stopPropagation();saveTk()">Lưu</button> <button class="s" style="padding:2px 6px" onclick="event.stopPropagation();editTk=null;render()">Hủy</button></td></tr>`;
+            <td class="n${r.cS < 0 ? " neg" : ""}">${fmt(r.cS)}</td>${!compactCols ? `<td class=n>${fmt(r.cDG)}</td>` : ""}<td class="n${r.cG < 0 ? " neg" : ""}">${fmt(r.cG)}</td></tr>`;
         }
-        const rowCls = r.isNegative ? "er" : (sel === r.ma ? "sel" : "");
-        const negBadge = r.isNegative ? ` <span style="font-size:11px;font-weight:700;padding:1px 5px;border-radius:4px;background:#dc2626;color:#fff">Tồn âm</span>` : "";
-        const ktBtn = r.isNegative ? ` <button class="d" style="padding:2px 6px" onclick="event.stopPropagation();jumpToNegProduct('${esc(r.ma)}',${isVpdd})" title="Kiểm tra chi tiết Xuất Nhập kho mã hàng này">KT XNK</button>` : "";
-        return `<tr class="${rowCls}" data-row-ma="${esc(r.ma)}" data-vp="${isVpdd ? 1 : 0}" style="cursor:pointer"><td><b>${esc(r.ma)}</b>${negBadge}</td><td>${esc(r.ten)}</td><td>${esc(r.dvt)}</td><td class=n>${fmt(r.dS)}</td><td class=n>${fmt(r.dDG)}</td><td class=n>${fmt(r.dG)}</td><td class=n>${fmt(r.nS)}</td><td class=n>${fmt(r.nG)}</td><td class=n>${fmt(r.xS)}</td><td class=n>${fmt(r.xG)}</td><td class="n${r.cS < 0 ? " neg" : ""}">${fmt(r.cS)}</td><td class=n>${fmt(r.cDG)}</td><td class="n${r.cG < 0 ? " neg" : ""}">${fmt(r.cG)}</td><td class="noprint">${ktBtn}<button class="s" style="padding:2px 6px" onclick="event.stopPropagation();openSc(false,'${esc(r.ma)}',${isVpdd})">S10-DN</button> <button class="s" style="padding:2px 6px" onclick="event.stopPropagation();startEditTk('${esc(r.ma)}',${isVpdd})">Sửa</button> <button class="s" style="padding:2px 6px;color:#dc2626" onclick="event.stopPropagation();delTkOpening('${esc(r.ma)}',${isVpdd})">Xóa</button></td></tr>`;
+        const rowCls = [r.isNegative ? "er" : "", sel === r.ma ? "sel" : ""].filter(Boolean).join(" ");
+        return `<tr class="${rowCls}" data-row-ma="${esc(r.ma)}" data-neg="${r.isNegative ? 1 : 0}" data-vp="${isVpdd ? 1 : 0}" style="cursor:pointer" title="Nhấp chọn để In S10 / Sửa ĐK / KT XNK ở thanh trên · Nhấp đúp để sửa ĐK"><td><b>${esc(r.ma)}</b></td><td>${esc(r.ten)}</td>${!compactCols ? `<td>${esc(r.dvt)}</td>` : ""}<td class=n>${fmt(r.dS)}</td>${!compactCols ? `<td class=n>${fmt(r.dDG)}</td>` : ""}<td class=n>${fmt(r.dG)}</td><td class=n>${fmt(r.nS)}</td><td class=n>${fmt(r.nG)}</td><td class=n>${fmt(r.xS)}</td><td class=n>${fmt(r.xG)}</td><td class="n${r.cS < 0 ? " neg" : ""}">${fmt(r.cS)}</td>${!compactCols ? `<td class=n>${fmt(r.cDG)}</td>` : ""}<td class="n${r.cG < 0 ? " neg" : ""}">${fmt(r.cG)}</td></tr>`;
       }).join("");
 
       const title = isVpdd
         ? `TỔNG HỢP TỒN KHO VPĐD (TK 1368), ${per.t.toUpperCase()} ${per.t === "Năm" ? "" : per.k + "/"}${C.Y}`
         : `TỔNG HỢP NHẬP - XUẤT - TỒN KHO, ${per.t.toUpperCase()} ${per.t === "Năm" ? "" : per.k + "/"}${C.Y}`;
       const pfx = isVpdd ? "tkVp" : "tk";
+      const tkColWidths = compactCols
+        ? ["9%", "25%", "7%", "9.5%", "7%", "9.5%", "7%", "9.5%", "7%", "9.5%"]
+        : ["7.5%", "19%", "4%", "6%", "7%", "8%", "6%", "8%", "6%", "8%", "6%", "6.5%", "8%"];
+      const tkColsHtml = `<colgroup>${tkColWidths.map(w => `<col style="width:${w}">`).join("")}</colgroup>`;
+      const tkHead = compactCols
+        ? th(["Mã hàng", "Tên hàng hóa", "Đầu SL", "Đầu GT", "Nhập SL", "Nhập GT", "Xuất SL", "Xuất GT", "Cuối SL", "Cuối GT"], [2, 3, 4, 5, 6, 7, 8, 9])
+        : th(["Mã hàng", "Tên hàng hóa", "ĐVT", "Đầu SL", "Đầu ĐG", "Đầu GT", "Nhập SL", "Nhập GT", "Xuất SL", "Xuất GT", "Cuối SL", "Cuối ĐG", "Cuối GT"], [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+      const tkTotRow = compactCols
+        ? `<tr class="tt"><td colspan=2>TỔNG CỘNG (${sumRows.length} mã)</td><td class=n>${fmt(T.dS)}</td><td class=n>${fmt(T.dG)}</td><td class=n>${fmt(T.nS)}</td><td class=n>${fmt(T.nG)}</td><td class=n>${fmt(T.xS)}</td><td class=n>${fmt(T.xG)}</td><td class="n${T.cS < 0 ? " neg" : ""}">${fmt(T.cS)}</td><td class="n${T.cG < 0 ? " neg" : ""}">${fmt(T.cG)}</td></tr>`
+        : `<tr class="tt"><td colspan=3>TỔNG CỘNG (${sumRows.length} mã)</td><td class=n>${fmt(T.dS)}</td><td></td><td class=n>${fmt(T.dG)}</td><td class=n>${fmt(T.nS)}</td><td class=n>${fmt(T.nG)}</td><td class=n>${fmt(T.xS)}</td><td class=n>${fmt(T.xG)}</td><td class="n${T.cS < 0 ? " neg" : ""}">${fmt(T.cS)}</td><td></td><td class="n${T.cG < 0 ? " neg" : ""}">${fmt(T.cG)}</td></tr>`;
+      const tkActionBtns = (editTk && editTk.isVp === isVpdd)
+        ? `<button onclick="saveTk()">💾 Lưu ĐK</button><button class="s" onclick="editTk=null;render()">✕ Hủy</button>`
+        : selRow
+          ? `<button class="s" onclick="startEditTk('${esc(selRow.ma)}',${isVpdd})">✎ Sửa ĐK</button><button class="s" style="color:#dc2626" onclick="delTkOpening('${esc(selRow.ma)}',${isVpdd})">🗑 Xóa ĐK</button>${selRow.isNegative ? `<button class="d" onclick="jumpToNegProduct('${esc(selRow.ma)}',${isVpdd})">🔍 KT XNK (${esc(selRow.ma)})</button>` : ""}`
+          : "";
 
       return `${coHead()}
               <div class="bar noprint">${upl(isVpdd ? "tk_vpdd" : "dm")}<button class="s" onclick="tpl('${isVpdd ? "tk_vpdd" : "tk"}')">📄 Tải file mẫu</button>
@@ -1849,63 +2191,79 @@
               <input id="${isVpdd ? "tkVpQ" : "tkQ"}" placeholder="Tìm mã / tên hàng..." value="${esc(qVal)}">
               <select id="${isVpdd ? "ktVp" : "kt"}">${["Tháng", "Quý", "Năm"].map(x => `<option ${x === per.t ? "selected" : ""}>${x}</option>`).join("")}</select>
               <input id="${isVpdd ? "kkVp" : "kk"}" type="number" min="1" max="${per.t === "Quý" ? 4 : 12}" value="${per.k}" ${per.t === "Năm" ? "disabled" : ""}>
+              <button class="s ${compactCols ? "on" : ""}" onclick="${isVpdd ? "tkVpddCompactCols=!tkVpddCompactCols" : "tkCompactCols=!tkCompactCols"};render()" title="Ẩn/hiện cột ĐVT, Đầu ĐG, Cuối ĐG">${compactCols ? "Hiện đủ cột" : "Thu gọn cột"}</button>
               <button class="s" onclick="window.print()">🖨 In bảng tổng hợp</button>
               <select id="sp" data-vp="${isVpdd ? 1 : 0}">${list.map(p => `<option value="${esc(p.ma)}" ${p.ma === sel ? "selected" : ""}>${esc(p.ma)} - ${esc(p.ten)}</option>`).join("")}</select>
-              <button onclick="openSc(false,'',${isVpdd})">📒 In S10-DN (${esc(sel)})</button>
+              <span id="topTkPrintSlot" style="display:inline-flex;gap:6px;align-items:center"><button onclick="openSc(false,'',${isVpdd})">📒 In S10-DN (${esc(sel)})</button></span>
               <button class="s" onclick="openSc(true,'',${isVpdd})">In sổ tất cả</button>
+              <span id="topActSlot" style="display:inline-flex;gap:6px;align-items:center">${tkActionBtns}</span>
               ${isVpdd ? `<label><input id="vpAll" type="checkbox" ${vpddShowAll ? "checked" : ""}> Hiện cả mã chưa PS</label>` : ""}
               <label style="margin-left:auto"><input id="${pfx}NegTop" type="checkbox" ${negTop ? "checked" : ""}> Đẩy tồn âm lên đầu</label>
               ${negCount > 0 ? `<button id="${pfx}OnlyNeg" class="s err-btn ${onlyNeg ? "on" : ""}">${onlyNeg ? `Đang lọc ${negCount} tồn âm (Tắt)` : `⚠ ${negCount} tồn âm`}</button>` : ""}</div>
-              ${negCount > 0 ? `<div class="st er noprint"><span><b>Lỗi: Có ${negCount} mặt hàng tồn cuối âm!</b> Yêu cầu kiểm tra chi tiết Xuất Nhập kho (đã tô đỏ và đẩy lên đầu bảng).</span><button class="s" style="padding:2px 8px" onclick="${isVpdd ? "tkVpOnlyNeg=!tkVpOnlyNeg" : "tkOnlyNeg=!tkOnlyNeg"};render()">${onlyNeg ? "Hiện tất cả mặt hàng" : "Chỉ xem hàng tồn âm"}</button></div>` : ""}
+              ${negCount > 0 ? `<div class="st er noprint"><span><b>Lỗi: Có ${negCount} mặt hàng tồn cuối âm!</b>${focusNeg ? ` Mã <b>${esc(focusNeg.ma)}</b> (Cuối SL: <b>${fmt(focusNeg.cS)}</b>, GT: <b>${fmt(focusNeg.cG)}</b>) —` : ""} Yêu cầu kiểm tra chi tiết Xuất Nhập kho.</span><div style="display:flex;gap:6px;flex-wrap:wrap">${focusNeg ? `<button class="d" style="padding:2px 8px" onclick="jumpToNegProduct('${esc(focusNeg.ma)}',${isVpdd})">🔍 KT XNK (${esc(focusNeg.ma)})</button>` : ""}<button class="s" style="padding:2px 8px" onclick="${isVpdd ? "tkVpOnlyNeg=!tkVpOnlyNeg" : "tkOnlyNeg=!tkOnlyNeg"};tabPage['${tabKey}']=1;render()">${onlyNeg ? "Hiện tất cả mặt hàng" : "Chỉ xem hàng tồn âm"}</button></div></div>` : ""}
               ${b > C.U ? `<div class="st er">Kỳ này có tháng chưa tính giá (đã tính đến tháng ${C.U}).</div>` : ""}
               <h3 style="margin:0">${title}</h3>
-              <div class="w"><table><thead>${th(["Mã hàng", "Tên hàng hóa", "ĐVT", "Đầu SL", "Đầu ĐG", "Đầu GT", "Nhập SL", "Nhập GT", "Xuất SL", "Xuất GT", "Cuối SL", "Cuối ĐG", "Cuối GT", "Thao tác"], [3, 4, 5, 6, 7, 8, 9, 10, 11, 12])}
-              <tr class="tt"><td colspan=3>TỔNG CỘNG (${sumRows.length} mã)</td><td class=n>${fmt(T.dS)}</td><td></td><td class=n>${fmt(T.dG)}</td><td class=n>${fmt(T.nS)}</td><td class=n>${fmt(T.nG)}</td><td class=n>${fmt(T.xS)}</td><td class=n>${fmt(T.xG)}</td><td class="n${T.cS < 0 ? " neg" : ""}">${fmt(T.cS)}</td><td></td><td class="n${T.cG < 0 ? " neg" : ""}">${fmt(T.cG)}</td><td class="noprint"></td></tr></thead>
-              <tbody>${rows}</tbody></table></div>`;
+              <div class="w"><table>${tkColsHtml}<thead>${tkHead}${tkTotRow}</thead>
+              <tbody>${rows}</tbody></table></div>
+              ${pg.html}`;
     }
 
     function render() {
       $("#bsample").style.display = (P.length || Ln.length || NKX.length || tkOpening.length) ? "none" : "inline-block";
       $("#nv").innerHTML = TABS.map(t => `<button class="${t[0] === tab || (tab === "sc" && t[0] === "tk") || (tab === "sc_vpdd" && t[0] === "tk_vpdd") || ((tab === "s38" || tab === "socai") && t[0] === "cdsps") ? "on" : ""}" data-t="${t[0]}">${t[1]}</button>`).join("");
-      const C = calcSet(P, Ln);
-      const vpProds = getVpddProducts(), vpLines = getVpddLines(), CVp = calcSet(vpProds, vpLines);
+      const C = getC();
 
       let h = msg ? `<div class="st ${merr ? "er" : ""}"><span>${esc(msg)}</span><button class="s" style="padding:1px 6px" onclick="msg='';render()">✕</button></div>` : "";
       msg = ""; merr = 0;
 
       if (tab === "dm") {
         let tSL = 0, tGT = 0;
-        const dmEditRow = (d, isNew) => `<tr style="background:var(--warn)">
-          <td><input data-edm="ma" value="${esc(d.ma)}" style="width:96px" placeholder="Mã hàng"></td>
-          <td><input data-edm="ten" value="${esc(d.ten)}" style="width:220px" placeholder="Tên hàng hóa"></td>
-          <td><input data-edm="dvt" value="${esc(d.dvt)}" style="width:72px" placeholder="ĐVT"></td>
-          <td><input type="number" data-edm="sl" value="${d.sl}" style="width:82px;text-align:right"></td>
+        const dmEditRow = (d) => `<tr class="ed-row" style="background:var(--warn)" data-edkind="dm">
+          <td><input data-edm="ma" value="${esc(d.ma)}" placeholder="Mã hàng"></td>
+          <td><input data-edm="ten" value="${esc(d.ten)}" placeholder="Tên hàng hóa"></td>
+          <td><input data-edm="dvt" value="${esc(d.dvt)}" placeholder="ĐVT"></td>
+          <td><input type="number" data-edm="sl" value="${d.sl}" style="text-align:right"></td>
           <td class=n>${fmt(d.sl ? Math.round(d.gt / d.sl) : 0)}</td>
-          <td><input type="number" data-edm="gt" value="${d.gt}" style="width:110px;text-align:right"></td>
-          <td class="noprint"><button style="padding:2px 6px" onclick="saveDm()">${isNew ? "Lưu mới" : "Lưu"}</button> <button class="s" style="padding:2px 6px" onclick="editDm=null;render()">Hủy</button></td></tr>`;
-        const newDmHtml = (editDm && editDm.origMa === null) ? dmEditRow(editDm.draft, true) : "";
+          <td><input type="number" data-edm="gt" value="${d.gt}" style="text-align:right"></td></tr>`;
+        const newDmHtml = (editDm && editDm.origMa === null) ? dmEditRow(editDm.draft) : "";
         const dmList = getFilteredDm();
-        const rows = dmList.slice(0, 2000).map(p => {
-          tSL += p.sl || 0; tGT += Math.round(p.gt || 0);
-          if (editDm && editDm.origMa === p.ma) return dmEditRow(editDm.draft, false);
-          return `<tr data-edit-dm="${esc(p.ma)}" style="cursor:pointer" title="Click vào dòng để sửa"><td>${esc(p.ma)}</td><td>${esc(p.ten)}</td><td>${esc(p.dvt)}</td><td class=n>${fmt(p.sl)}</td><td class=n>${fmt(p.sl ? Math.round(p.gt / p.sl) : 0)}</td><td class=n>${fmt(p.gt)}</td><td class="noprint"><button class="s" style="padding:2px 6px" onclick="event.stopPropagation();startEditDm('${esc(p.ma)}')">Sửa</button> <button class="s" style="padding:2px 6px;color:#dc2626" onclick="event.stopPropagation();delDm('${esc(p.ma)}')">Xóa</button></td></tr>`;
+        for (let i = 0; i < dmList.length; i++) {
+          tSL += dmList[i].sl || 0;
+          tGT += Math.round(dmList[i].gt || 0);
+        }
+        const selDmRow = dmList.find(p => p.ma === selDmMa) || null;
+        const pg = pagerHtml("dm", dmList.length);
+        const rows = dmList.slice(pg.slice[0], pg.slice[1]).map(p => {
+          if (editDm && editDm.origMa === p.ma) return dmEditRow(editDm.draft);
+          return `<tr class="${selDmMa === p.ma ? "sel" : ""}" data-sel-dm="${esc(p.ma)}" style="cursor:pointer" title="Nhấp chọn để Sửa/Xóa ở thanh trên · Nhấp đúp để sửa"><td>${esc(p.ma)}</td><td>${esc(p.ten)}</td><td>${esc(p.dvt)}</td><td class=n>${fmt(p.sl)}</td><td class=n>${fmt(p.sl ? Math.round(p.gt / p.sl) : 0)}</td><td class=n>${fmt(p.gt)}</td></tr>`;
         }).join("");
-        const dmHead = catThHtml([["ma", "Mã hàng", 0], ["ten", "Tên hàng hóa", 0], ["dvt", "ĐVT", 0], ["sl", "Tồn đầu SL", 1], ["dg", "Đơn giá", 1], ["gt", "Tồn đầu GT", 1], ["", "Thao tác", 0]], dmSort, "dm");
-        h += `<div class="bar">${upl("dm")}<button class="s" onclick="tpl('dm')">📄 Tải file mẫu</button><button onclick="addDm()">+ Thêm mặt hàng</button><button class="s" onclick="expTab('dm')">⬇ Xuất Excel</button>
+        const dmHead = catThHtml([["ma", "Mã hàng", 0], ["ten", "Tên hàng hóa", 0], ["dvt", "ĐVT", 0], ["sl", "Tồn đầu SL", 1], ["dg", "Đơn giá", 1], ["gt", "Tồn đầu GT", 1]], dmSort, "dm");
+        const dmCols = `<colgroup><col style="width:13%"><col style="width:37%"><col style="width:9%"><col style="width:13%"><col style="width:13%"><col style="width:15%"></colgroup>`;
+        const dmActBtns = editDm
+          ? `<button onclick="saveDm()">💾 Lưu</button><button class="s" onclick="editDm=null;render()">✕ Hủy</button>`
+          : selDmRow
+            ? `<button onclick="startEditDm('${esc(selDmRow.ma)}')">✎ Sửa (${esc(selDmRow.ma)})</button><button class="s" style="color:#dc2626" onclick="delDm('${esc(selDmRow.ma)}');if(selDmMa==='${esc(selDmRow.ma)}')selDmMa=''">🗑 Xóa</button>`
+            : "";
+        h += `<div class="bar">${upl("dm")}<button class="s" onclick="tpl('dm')">📄 Tải file mẫu</button><button onclick="addDm()">+ Thêm mặt hàng</button><span id="topActSlot" style="display:inline-flex;gap:6px;align-items:center">${dmActBtns}</span><button class="s" onclick="expTab('dm')">⬇ Xuất Excel</button>
               <input id="dmQ" placeholder="Tìm mã / tên hàng / ĐVT..." value="${esc(dmQ)}">
               ${perCtrlHtml("dm", dmPer, "Kỳ PS:")}
-              <span class="m">${dmList.length}/${P.length} mã hàng. Bấm tiêu đề cột để sắp xếp.</span></div>
-              <div class="w"><table><thead>${dmHead}</thead><tbody>${newDmHtml}${rows}</tbody><tfoot><tr><td colspan=3>TỔNG CỘNG (${dmList.length} mã)</td><td class=n>${fmt(tSL)}</td><td></td><td class=n>${fmt(tGT)}</td><td class="noprint"></td></tr></tfoot></table></div>`;
+              <span class="m">${dmList.length}/${P.length} mã hàng. Chọn dòng để Sửa/Xóa · Bấm tiêu đề để sắp xếp.</span></div>
+              <div class="w"><table>${dmCols}<thead>${dmHead}</thead><tbody>${newDmHtml}${rows}</tbody><tfoot><tr><td colspan=3>TỔNG CỘNG (${dmList.length} mã)</td><td class=n>${fmt(tSL)}</td><td></td><td class=n>${fmt(tGT)}</td></tr></tfoot></table></div>
+              ${pg.html}`;
       } else if (tab === "ct") {
         h += renderCtView(false, C, Ln, P);
       } else if (tab === "ct_vpdd") {
+        const { vpProds, vpLines, CVp } = getVpContext();
         h += renderCtView(true, CVp, vpLines, vpProds);
       } else if (tab === "tk") {
         h += renderTkView(false, C, P, Ln);
       } else if (tab === "tk_vpdd") {
+        const { vpProds, vpLines, CVp } = getVpContext();
         h += renderTkView(true, CVp, vpProds, vpLines);
       } else if (tab === "sc" || tab === "sc_vpdd") {
-        const isVp = tab === "sc_vpdd", cUse = isVp ? CVp : C, pUse = isVp ? vpProds : P, lUse = isVp ? vpLines : Ln;
+        const isVp = tab === "sc_vpdd";
+        const vpCtx = isVp ? getVpContext() : null;
+        const cUse = isVp ? vpCtx.CVp : C, pUse = isVp ? vpCtx.vpProds : P, lUse = isVp ? vpCtx.vpLines : Ln;
         const maUse = isVp ? scVpddMa : scMa;
         const [, b] = rangeOf(s10), used = new Set(lUse.map(l => l.ma));
         h += `<div class="bar noprint"><button class="s" onclick="tab='${isVp ? "tk_vpdd" : "tk"}';render()">← Quay lại</button>
@@ -1920,33 +2278,51 @@
       } else if (tab === "nk") {
         const allNkLen = buildNkRows(C).length;
         const R = getFilteredNk(C);
-        const tot = R.reduce((a, r) => a + Math.round(r.s || 0), 0);
-        const nkEditRow = (d) => `<tr style="background:var(--warn)">
+        let tot = 0;
+        for (let i = 0; i < R.length; i++) tot += Math.round(R[i].s || 0);
+        const selNkRow = R.find(r => r.key === selNkKey) || null;
+        const nkEditRow = (d) => `<tr class="ed-row" style="background:var(--warn)" data-edkind="nk">
           <td><input type="date" data-enk="ngay" value="${esc(d.ngay)}"></td>
-          <td><input data-enk="ph" value="${esc(d.ph)}" style="width:92px" placeholder="Mã phiếu"></td>
-          <td><input data-enk="hd" value="${esc(d.hd)}" style="width:76px" placeholder="Số HĐ"></td>
-          <td><input data-enk="nd" value="${esc(d.nd)}" style="width:170px" placeholder="Nội dung"></td>
-          <td><input data-enk="no" value="${esc(d.no)}" style="width:56px" placeholder="TK Nợ"></td>
-          <td><input data-enk="co" value="${esc(d.co)}" style="width:56px" placeholder="TK Có"></td>
-          <td><input type="number" data-enk="tien" value="${d.tien}" style="width:96px;text-align:right"></td>
-          <td><input data-enk="kh" value="${esc(d.kh)}" style="width:82px" placeholder="KH/NCC"></td>
-          <td><input data-enk="gc" value="${esc(d.gc)}" style="width:130px" placeholder="Ghi chú"></td>
-          <td class="noprint"><button style="padding:2px 6px" onclick="saveNk()">Lưu</button> <button class="s" style="padding:2px 6px" onclick="editNk=null;render()">Hủy</button></td></tr>`;
+          <td><input data-enk="ph" value="${esc(d.ph)}" placeholder="Mã phiếu"></td>
+          ${!nkCompactCols ? `<td><input data-enk="hd" value="${esc(d.hd)}" placeholder="Số HĐ"></td>` : ""}
+          <td><input data-enk="nd" value="${esc(d.nd)}" placeholder="Nội dung"></td>
+          <td><input data-enk="no" value="${esc(d.no)}" placeholder="TK Nợ"></td>
+          <td><input data-enk="co" value="${esc(d.co)}" placeholder="TK Có"></td>
+          <td><input type="number" data-enk="tien" value="${d.tien}" style="text-align:right"></td>
+          ${!nkCompactCols ? `<td><input data-enk="kh" value="${esc(d.kh)}" placeholder="KH/NCC"></td>` : ""}
+          <td><input data-enk="gc" value="${esc(d.gc)}" placeholder="Ghi chú"></td></tr>`;
         const newNkHtml = (editNk && editNk.idx === null) ? nkEditRow(editNk.draft) : "";
-        h += `<div class="bar noprint">${upl("nk")}<button class="s" onclick="tpl('nk')">📄 Tải file mẫu</button><button onclick="addNk()">+ Thêm bút toán</button><button class="s" onclick="expTab('nk')">⬇ Xuất Excel</button>
+        const pg = pagerHtml("nk", R.length);
+        const nkCols = nkCompactCols
+          ? (nkNdCompact
+              ? ["9%", "10.5%", "10%", "6.5%", "6.5%", "12.5%", "45%"]
+              : ["9%", "10.5%", "31%", "6.5%", "6.5%", "12.5%", "24%"])
+          : (nkNdCompact
+              ? ["7.5%", "8.5%", "7%", "8%", "5.5%", "5.5%", "11%", "8.5%", "38.5%"]
+              : ["7.5%", "8.5%", "7%", "26%", "5.5%", "5.5%", "11%", "8.5%", "20.5%"]);
+        const nkColgroup = `<colgroup>${nkCols.map(w => `<col style="width:${w}">`).join("")}</colgroup>`;
+        const nkTh = `<tr><th>Ngày</th><th>Mã phiếu</th>${!nkCompactCols ? `<th>Số HĐ</th>` : ""}<th>Nội dung<button type="button" class="nd-toggle noprint" data-nd-tog="nk">${nkNdCompact ? "Mở" : "Thu gọn"}</button></th><th>TK Nợ</th><th>TK Có</th><th class="n">Số tiền</th>${!nkCompactCols ? `<th>Mã KH/NCC</th>` : ""}<th>Ghi chú</th></tr>`;
+        const nkActBtns = editNk
+          ? `<button onclick="saveNk()">💾 Lưu</button><button class="s" onclick="editNk=null;render()">✕ Hủy</button>`
+          : selNkRow
+            ? `${selNkRow.src === "imp" ? `<button onclick="startEditNk(${selNkRow.idx})">✎ Sửa (${esc(selNkRow.ph || "dòng")})</button><button class="s" style="color:#dc2626" onclick="delNk(${selNkRow.idx});selNkKey=''">🗑 Xóa</button>` : `<button class="s" onclick="jumpToKho('${esc(selNkRow.ph)}')">✎ Sửa ở Kho</button>`}<button class="s" onclick="directNkNoteKey='${esc(selNkRow.key)}';render()">Ghi chú</button>`
+            : "";
+        h += `<div class="bar noprint">${upl("nk")}<button class="s" onclick="tpl('nk')">📄 Tải file mẫu</button><button onclick="addNk()">+ Thêm bút toán</button><span id="topActSlot" style="display:inline-flex;gap:6px;align-items:center">${nkActBtns}</span><button class="s ${nkCompactCols ? "on" : ""}" onclick="nkCompactCols=!nkCompactCols;render()" title="Ẩn/hiện cột Số HĐ, Mã KH/NCC">${nkCompactCols ? "Hiện đủ cột" : "Thu gọn cột"}</button><button class="s" onclick="expTab('nk')">⬇ Xuất Excel</button>
               <input id="nkQ" placeholder="Tìm phiếu / nội dung / TK / KH..." value="${esc(nkQ)}">
               ${perCtrlHtml("nk", nkPer, "Kỳ:")}
               <button class="s" onclick="window.print()">🖨 In</button><span class="m">${R.length}/${allNkLen} dòng (${NKX.length} ngoài kho).</span></div>
               ${coHead()}<h3 style="margin:0">NHẬT KÝ CHUNG - NĂM ${C.Y}</h3>
-              <div class="w"><table><thead>${th(["Ngày", "Mã phiếu", "Số HĐ", "Nội dung", "TK Nợ", "TK Có", "Số tiền", "Mã KH/NCC", "Ghi chú", "Thao tác"], [6])}</thead>
-              <tbody>${newNkHtml}${R.slice(0, 3000).map(r => {
+              <div class="w"><table>${nkColgroup}<thead>${nkTh}</thead>
+              <tbody>${newNkHtml}${R.slice(pg.slice[0], pg.slice[1]).map(r => {
                 if (r.src === "imp" && editNk && editNk.idx === r.idx) return nkEditRow(editNk.draft);
-                const act = r.src === "imp"
-                  ? `<button class="s" style="padding:2px 6px" onclick="event.stopPropagation();startEditNk(${r.idx})">Sửa</button> <button class="s" style="padding:2px 6px;color:#dc2626" onclick="event.stopPropagation();delNk(${r.idx})">Xóa</button>`
-                  : `<button class="s" style="padding:2px 6px" onclick="event.stopPropagation();jumpToKho('${esc(r.ph)}')" title="Mở chứng từ kho để sửa">Sửa ở Kho</button>`;
-                return `<tr ${r.src === "imp" ? `data-edit-nk="${r.idx}" style="cursor:pointer" title="Click dòng để sửa"` : ""}><td>${r.ngay ? dr(r.ngay) : ""}</td><td>${esc(r.ph)}</td><td>${esc(r.hd)}</td><td>${esc(r.nd)}</td><td>${esc(r.no)}</td><td>${esc(r.co)}</td><td class=n>${fmt(r.s)}</td><td>${esc(r.kh)}</td><td><input class="nk-gc noprint" data-nkkey="${esc(r.key)}" data-nksrc="${r.src}" data-nkidx="${r.idx}" placeholder="Thêm ghi chú..." value="${esc(r.gc)}"><span class="only-prn">${esc(r.gc)}</span></td><td class="noprint">${act}</td></tr>`;
+                const isNoteEd = directNkNoteKey === r.key;
+                const gcCell = isNoteEd
+                  ? `<td onclick="event.stopPropagation()"><input id="nkNoteDirectInp" class="nk-gc" style="border-color:var(--ac);background:var(--surface)" data-nkkey="${esc(r.key)}" data-nksrc="${r.src}" data-nkidx="${r.idx}" value="${esc(r.gc)}" placeholder="Nhập ghi chú..."></td>`
+                  : `<td data-nk-note-cell="${esc(r.key)}" data-nksrc="${r.src}" data-nkidx="${r.idx}" title="Nhấp đúp để nhập ghi chú trực tiếp">${esc(r.gc) || `<span class="m noprint">—</span>`}</td>`;
+                return `<tr class="${selNkKey === r.key ? "sel" : ""}" data-sel-nk="${esc(r.key)}" data-nksrc="${r.src}" data-nkidx="${r.idx}" data-nkph="${esc(r.ph)}" style="cursor:pointer" title="${r.src === "imp" ? "Nhấp chọn để Sửa/Xóa · Nhấp đúp để sửa bút toán" : "Nhấp chọn để Sửa ở Kho · Nhấp đúp Ghi chú để sửa"}"><td>${r.ngay ? dr(r.ngay) : ""}</td><td>${esc(r.ph)}</td>${!nkCompactCols ? `<td>${esc(r.hd)}</td>` : ""}<td class="nd-cell ${nkNdCompact ? "compact" : ""}" title="${esc(r.nd)}">${esc(r.nd)}</td><td>${esc(r.no)}</td><td>${esc(r.co)}</td><td class=n>${fmt(r.s)}</td>${!nkCompactCols ? `<td>${esc(r.kh)}</td>` : ""}${gcCell}</tr>`;
               }).join("")}</tbody>
-              <tfoot><tr><td colspan=6>TỔNG CỘNG (${R.length} dòng)</td><td class=n>${fmt(tot)}</td><td colspan=2></td><td class="noprint"></td></tr></tfoot></table></div>`;
+              <tfoot><tr><td colspan=${nkCompactCols ? 5 : 6}>TỔNG CỘNG (${R.length} dòng)</td><td class=n>${fmt(tot)}</td><td colspan=${nkCompactCols ? 1 : 2}></td></tr></tfoot></table></div>
+              ${pg.html}`;
       } else if (tab === "cdsps") {
         const nkRows = buildNkRows(C);
         const { rows, tot } = buildCdsps(cdspsCir, nkRows, C.Y, cdspsPer);
@@ -1955,33 +2331,32 @@
         const cirNote = cdspsCir === "TT99" ? "(Kèm theo Thông tư số 99/2025/TT-BTC ngày 27/10/2025)" : "(Ban hành theo Thông tư số 200/2014/TT-BTC ngày 22/12/2014)";
         const openTkSet = new Set(tkOpening.map(o => String(o.tk || "").trim()));
         const cdq = cdQ.trim().toLowerCase();
-        const tbodyHtml = rows.filter(r => {
+        const visibleCdsps = rows.filter(r => {
           const forceErr = (rec.ar131.hasMismatch && r.tk.startsWith("131")) || (rec.ap331.hasMismatch && r.tk.startsWith("331"));
           return (!cdspsHideZero || r.hasAny || forceErr) && (!cdq || (r.tk + " " + r.ten).toLowerCase().includes(cdq));
-        }).map(r => {
+        });
+        const selCdRow = rows.find(r => r.tk === selTk) || null;
+        const tbodyHtml = visibleCdsps.map(r => {
           const hidePrn = cdspsHideNoPer ? !r.hasPer : !r.hasAny;
           const isSel = selTk === r.tk;
           const isMis131 = rec.ar131.hasMismatch && r.tk.startsWith("131");
           const isMis331 = rec.ap331.hasMismatch && r.tk.startsWith("331");
           const isMismatch = isMis131 || isMis331;
           if (editCdsps && editCdsps.tk === r.tk) {
-            return `<tr style="background:var(--warn)">
+            return `<tr class="ed-row" style="background:var(--warn)" data-edkind="cdsps">
               <td><b>${esc(r.tk)}</b></td>
-              <td><input data-ecd="ten" value="${esc(editCdsps.ten)}" style="width:220px"></td>
-              <td><input type="number" data-ecd="no" value="${editCdsps.no}" style="width:96px;text-align:right"></td>
-              <td><input type="number" data-ecd="co" value="${editCdsps.co}" style="width:96px;text-align:right"></td>
+              <td><input data-ecd="ten" value="${esc(editCdsps.ten)}"></td>
+              <td><input type="number" data-ecd="no" value="${editCdsps.no}" style="text-align:right"></td>
+              <td><input type="number" data-ecd="co" value="${editCdsps.co}" style="text-align:right"></td>
               <td class=n>${r.pNo ? fmt(r.pNo) : ""}</td><td class=n>${r.pCo ? fmt(r.pCo) : ""}</td>
-              <td class=n>${r.cNo ? fmt(r.cNo) : ""}</td><td class=n>${r.cCo ? fmt(r.cCo) : ""}</td>
-              <td class="noprint"><button style="padding:2px 6px" onclick="event.stopPropagation();saveCdspsOpening()">Lưu</button> <button class="s" style="padding:2px 6px" onclick="event.stopPropagation();editCdsps=null;render()">Hủy</button></td></tr>`;
+              <td class=n>${r.cNo ? fmt(r.cNo) : ""}</td><td class=n>${r.cCo ? fmt(r.cCo) : ""}</td></tr>`;
           }
-          const hasOp = openTkSet.has(r.tk);
-          const misTag = isMis131 ? ` <span style="font-size:11px;font-weight:700;padding:1px 5px;border-radius:4px;background:#dc2626;color:#fff">Lỗi lệch DM KH</span>` : (isMis331 ? ` <span style="font-size:11px;font-weight:700;padding:1px 5px;border-radius:4px;background:#dc2626;color:#fff">Lỗi lệch DM NCC</span>` : "");
-          return `<tr class="${isMismatch ? "er" : (isSel ? "sel" : "")} ${hidePrn ? "hide-prn" : ""}" data-tk="${esc(r.tk)}" style="cursor:pointer;${!r.hasAny && !isMismatch ? "opacity:.55" : ""}">
-            <td><b>${esc(r.tk)}</b></td><td>${esc(r.ten)}${misTag}</td>
+          const clsList = [isMismatch ? "er" : "", isSel ? "sel" : "", hidePrn ? "hide-prn" : ""].filter(Boolean).join(" ");
+          return `<tr class="${clsList}" data-tk="${esc(r.tk)}" data-tkten="${esc(r.ten)}" data-dno="${r.dNo}" data-dco="${r.dCo}" data-hasopen="${openTkSet.has(r.tk) ? 1 : 0}" style="cursor:pointer;${!r.hasAny && !isMismatch ? "opacity:.55" : ""}" title="Nhấp chọn để In/Sửa ĐK ở thanh trên · Nhấp đúp để sửa ĐK">
+            <td><b>${esc(r.tk)}</b></td><td>${esc(r.ten)}</td>
             <td class=n>${r.dNo ? fmt(r.dNo) : ""}</td><td class=n>${r.dCo ? fmt(r.dCo) : ""}</td>
             <td class=n>${r.pNo ? fmt(r.pNo) : ""}</td><td class=n>${r.pCo ? fmt(r.pCo) : ""}</td>
-            <td class=n><b>${r.cNo ? fmt(r.cNo) : ""}</b></td><td class=n><b>${r.cCo ? fmt(r.cCo) : ""}</b></td>
-            <td class="noprint"><button class="${isSel ? "" : "s"}" style="padding:2px 6px" onclick="event.stopPropagation();openSoCai('${esc(r.tk)}')">Sổ cái</button> <button class="${isSel ? "" : "s"}" style="padding:2px 6px" onclick="event.stopPropagation();openS38('${esc(r.tk)}')">Sổ S38</button> <button class="s" style="padding:2px 6px" onclick="event.stopPropagation();startEditCdsps('${esc(r.tk)}','${esc(r.ten)}',${r.dNo},${r.dCo})">Sửa</button>${hasOp ? ` <button class="s" style="padding:2px 6px;color:#dc2626" onclick="event.stopPropagation();delCdspsOpening('${esc(r.tk)}')" title="Xóa số dư đầu kỳ TK">Xóa</button>` : ""}</td></tr>`;
+            <td class=n><b>${r.cNo ? fmt(r.cNo) : ""}</b></td><td class=n><b>${r.cCo ? fmt(r.cCo) : ""}</b></td></tr>`;
         }).join("");
         const recBanner = rec.hasError ? `<div class="st er noprint" style="flex-direction:column;align-items:stretch;gap:4px">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
@@ -1994,25 +2369,34 @@
           ${rec.ar131.hasMismatch ? `<div>• <b>TK 131 (Phải thu KH):</b> CĐSPS ĐK (Nợ-Có) = <b>${fmt(rec.ar131.cdspsOpenNet)}</b> vs DM KH = <b>${fmt(rec.ar131.khOpenNet)}</b> (lệch ${fmt(rec.ar131.openDiff)}) · CĐSPS CK (Nợ-Có) = <b>${fmt(rec.ar131.cdspsEndNet)}</b> vs DM KH = <b>${fmt(rec.ar131.khEndNet)}</b> (lệch ${fmt(rec.ar131.endDiff)})</div>` : ""}
           ${rec.ap331.hasMismatch ? `<div>• <b>TK 331 (Phải trả NCC):</b> CĐSPS ĐK (Có-Nợ) = <b>${fmt(rec.ap331.cdspsOpenNet)}</b> vs DM NCC = <b>${fmt(rec.ap331.nccOpenNet)}</b> (lệch ${fmt(rec.ap331.openDiff)}) · CĐSPS CK (Có-Nợ) = <b>${fmt(rec.ap331.cdspsEndNet)}</b> vs DM NCC = <b>${fmt(rec.ap331.nccEndNet)}</b> (lệch ${fmt(rec.ap331.endDiff)})</div>` : ""}
         </div>` : "";
+        const cdCols = `<colgroup><col style="width:8%"><col style="width:29%"><col style="width:10.5%"><col style="width:10.5%"><col style="width:10.5%"><col style="width:10.5%"><col style="width:10.5%"><col style="width:10.5%"></colgroup>`;
+        const cdEditBtns = editCdsps
+          ? `<button onclick="saveCdspsOpening()">💾 Lưu ĐK</button><button class="s" onclick="editCdsps=null;render()">✕ Hủy</button>`
+          : selCdRow
+            ? `<button class="s" onclick="startEditCdsps('${esc(selCdRow.tk)}','${esc(selCdRow.ten)}',${selCdRow.dNo},${selCdRow.dCo})">✎ Sửa ĐK (${esc(selCdRow.tk)})</button>${openTkSet.has(selCdRow.tk) ? `<button class="s" style="color:#dc2626" onclick="delCdspsOpening('${esc(selCdRow.tk)}')">🗑 Xóa ĐK</button>` : ""}`
+            : "";
         h += `<div class="bar noprint">${upl("cdsps")}<button class="s" onclick="tpl('cdsps')">📄 Tải file mẫu đầu kỳ</button>
               <input id="cdQ" placeholder="Tìm số hiệu / tên TK..." value="${esc(cdQ)}">
               <select id="cdCir"><option value="TT200" ${cdspsCir === "TT200" ? "selected" : ""}>Mẫu Thông tư 200</option><option value="TT99" ${cdspsCir === "TT99" ? "selected" : ""}>Mẫu Thông tư 99</option></select>
               <select id="cdPt">${["Tháng", "Quý", "Năm"].map(x => `<option ${x === cdspsPer.t ? "selected" : ""}>${x}</option>`).join("")}</select>
               ${cdspsPer.t !== "Năm" ? `<select id="cdPk">${Array.from({ length: cdspsPer.t === "Quý" ? 4 : 12 }, (_, i) => i + 1).map(v => `<option value="${v}" ${v === cdspsPer.k ? "selected" : ""}>${cdspsPer.t} ${v}</option>`).join("")}</select>` : ""}
               <button class="s" id="cdExp">⬇ Xuất Excel</button>
-              <button class="s" onclick="openCdspsPrintModal()">🖨 In sổ (${esc(selTk)})</button>
-              <button class="s" onclick="openSoCai('${esc(selTk)}')">📖 Sổ cái (${esc(selTk)})</button>
-              <button onclick="openS38('${esc(selTk)}')">📒 Sổ chi tiết S38 (${esc(selTk)})</button>
+              <span id="topCdActSlot" style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap">
+                <button class="s" onclick="openCdspsPrintModal()">🖨 In sổ (${esc(selTk)})</button>
+                <button class="s" onclick="openSoCai('${esc(selTk)}')">📖 Sổ cái (${esc(selTk)})</button>
+                <button onclick="openS38('${esc(selTk)}')">📒 Sổ chi tiết S38 (${esc(selTk)})</button>
+                ${cdEditBtns}
+              </span>
               ${rec.hasError ? `<span class="s err-btn on" style="padding:4px 8px;border-radius:6px;font-weight:600">⚠ Lỗi lệch công nợ (${rec.errorCount} TK)</span>` : ""}
               <label><input id="cdHz" type="checkbox" ${cdspsHideZero ? "checked" : ""}> Ẩn TK trống</label>
               <label><input id="cdHnp" type="checkbox" ${cdspsHideNoPer ? "checked" : ""}> Khi in ẩn TK không PS kỳ</label></div>
               ${recBanner}
               <div class="co" style="display:none"><div style="display:flex;justify-content:space-between"><div><b>${esc(CFG.ten)}</b><br>${esc(CFG.dc)}</div><div style="text-align:right"><b>Mẫu số S06-DN</b><br><i>${cirNote}</i></div></div></div>
               <h3 style="margin:0">BẢNG CÂN ĐỐI SỐ PHÁT SINH (${cdspsCir === "TT99" ? "TT 99" : "TT 200"}) · ${perLbl}</h3>
-              <div class="w"><table><thead>
-                <tr><th rowspan=2>Số hiệu TK</th><th rowspan=2>Tên tài khoản</th><th colspan=2 style="text-align:center">Số dư đầu kỳ</th><th colspan=2 style="text-align:center">Số phát sinh trong kỳ</th><th colspan=2 style="text-align:center">Số dư cuối kỳ</th><th rowspan=2 class="noprint">Thao tác</th></tr>
+              <div class="w"><table>${cdCols}<thead>
+                <tr><th rowspan=2>Số hiệu TK</th><th rowspan=2>Tên tài khoản</th><th colspan=2 style="text-align:center">Số dư đầu kỳ</th><th colspan=2 style="text-align:center">Số phát sinh trong kỳ</th><th colspan=2 style="text-align:center">Số dư cuối kỳ</th></tr>
                 <tr><th class=n>Nợ</th><th class=n>Có</th><th class=n>Nợ</th><th class=n>Có</th><th class=n>Nợ</th><th class=n>Có</th></tr>
-                <tr class="tt"><td colspan=2>TỔNG CỘNG</td><td class=n>${fmt(tot.dNo)}</td><td class=n>${fmt(tot.dCo)}</td><td class=n>${fmt(tot.pNo)}</td><td class=n>${fmt(tot.pCo)}</td><td class=n>${fmt(tot.cNo)}</td><td class=n>${fmt(tot.cCo)}</td><td class="noprint"></td></tr>
+                <tr class="tt"><td colspan=2>TỔNG CỘNG</td><td class=n>${fmt(tot.dNo)}</td><td class=n>${fmt(tot.dCo)}</td><td class=n>${fmt(tot.pNo)}</td><td class=n>${fmt(tot.pCo)}</td><td class=n>${fmt(tot.cNo)}</td><td class=n>${fmt(tot.cCo)}</td></tr>
               </thead><tbody>${tbodyHtml}</tbody></table></div>`;
       } else if (tab === "socai") {
         const s = buildSoCaiContext(C);
@@ -2035,7 +2419,7 @@
                 <div style="display:flex;justify-content:space-between;gap:20px"><div><b>Đơn vị: ${esc(CFG.ten)}</b><br>Địa chỉ: ${esc(CFG.dc)}${CFG.mst ? "<br>MST: " + esc(CFG.mst) : ""}</div><div style="max-width:360px;font-size:14px"><b>Mẫu số S03b-DN</b><br><i>${cirNote}</i></div></div>
                 <h3 style="text-align:center;margin:10px 0 2px">SỔ CÁI</h3>
                 <div style="text-align:center"><i>(Dùng cho hình thức kế toán Nhật ký chung)</i><br><i>${perLbl}</i><br><b>Tên tài khoản: ${esc(s.tkName || s.activeTk)} &nbsp;|&nbsp; Số hiệu: ${esc(s.activeTk)} &nbsp;|&nbsp; Đơn vị tính: vnđ</b></div><br>
-                <div style="overflow-x:auto"><table><thead>
+                <div><table><colgroup><col style="width:8%"><col style="width:9%"><col style="width:8%"><col style="width:27%"><col style="width:6%"><col style="width:6%"><col style="width:8%"><col style="width:14%"><col style="width:14%"></colgroup><thead>
                   <tr><th rowspan=2>Ngày, tháng ghi sổ</th><th colspan=2>Chứng từ</th><th rowspan=2>Diễn giải</th><th colspan=2>Nhật ký chung</th><th rowspan=2>Số hiệu TK đối ứng</th><th colspan=2>Số tiền</th></tr>
                   <tr><th>Số hiệu</th><th>Ngày, tháng</th><th>Trang sổ</th><th>STT dòng</th><th>Nợ</th><th>Có</th></tr>
                   <tr><td align=center><i>A</i></td><td align=center><i>B</i></td><td align=center><i>C</i></td><td align=center><i>D</i></td><td align=center><i>E</i></td><td align=center><i>G</i></td><td align=center><i>H</i></td><td align=center><i>1</i></td><td align=center><i>2</i></td></tr>
@@ -2070,7 +2454,7 @@
                 <div style="display:flex;justify-content:space-between;gap:20px"><div><b>Đơn vị: ${esc(CFG.ten)}</b><br>Địa chỉ: ${esc(CFG.dc)}${CFG.mst ? "<br>MST: " + esc(CFG.mst) : ""}</div><div style="max-width:340px;font-size:14px"><b>Mẫu số S38-DN</b><br><i>${cirNote}</i></div></div>
                 <h3 style="text-align:center;margin:10px 0 2px">SỔ CHI TIẾT CÁC TÀI KHOẢN</h3>
                 <div style="text-align:center"><i>${perLbl}</i><br><b>Tài khoản: ${esc(s.activeTk)} ${s.tkName ? "- " + esc(s.tkName) : ""} &nbsp;|&nbsp; Đơn vị tính: vnđ</b></div><br>
-                <div style="overflow-x:auto"><table><thead>
+                <div><table><colgroup><col style="width:8%"><col style="width:9%"><col style="width:8%"><col style="width:22%"><col style="width:7%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:10%"></colgroup><thead>
                   <tr><th rowspan=2>Ngày ghi sổ</th><th colspan=2>Chứng từ</th><th rowspan=2>Diễn giải</th><th rowspan=2>TK đối ứng</th><th colspan=2>Số phát sinh</th><th colspan=2>Số dư</th><th rowspan=2>Ghi chú</th></tr>
                   <tr><th>Số hiệu</th><th>Ngày, tháng</th><th>Nợ</th><th>Có</th><th>Nợ</th><th>Có</th></tr>
                 </thead><tbody>
@@ -2085,37 +2469,46 @@
       } else if (tab === "kh" || tab === "ncc") {
         const d = computePartnerSummary(tab, C, true);
         const per = tab === "kh" ? khPer : nccPer, qVal = tab === "kh" ? khQ : nccQ, sortObj = tab === "kh" ? khSort : nccSort;
-        const pEditRow = (drf, isNew) => `<tr style="background:var(--warn)">
-          <td><input data-ept="ma" value="${esc(drf.ma)}" style="width:92px" placeholder="Mã"></td>
-          <td><input data-ept="ten" value="${esc(drf.ten)}" style="width:210px" placeholder="Tên đối tượng"></td>
-          <td><input data-ept="mst" value="${esc(drf.mst)}" style="width:104px" placeholder="MST"></td>
-          <td><input type="number" data-ept="dauNo" value="${drf.dauNo}" style="width:100px;text-align:right"></td>
-          <td><input type="number" data-ept="dauCo" value="${drf.dauCo}" style="width:100px;text-align:right"></td>
-          <td></td><td></td><td></td><td></td>
-          <td class="noprint"><button style="padding:2px 6px" onclick="savePartner()">${isNew ? "Lưu mới" : "Lưu"}</button> <button class="s" style="padding:2px 6px" onclick="editPartner=null;render()">Hủy</button></td></tr>`;
-        const newPartnerHtml = (editPartner && editPartner.kind === tab && editPartner.origMa === null) ? pEditRow(editPartner.draft, true) : "";
-        const rows = d.rows.map(o => {
-          if (editPartner && editPartner.kind === tab && editPartner.origMa === o.ma) return pEditRow(editPartner.draft, false);
-          return `<tr data-edit-pt="${esc(o.ma)}" data-ptkind="${tab}" data-ptten="${esc(o.ten)}" data-ptmst="${esc(o.mst)}" data-ptdauno="${o.dauNo}" data-ptdauco="${o.dauCo}" style="cursor:pointer" title="Click dòng để sửa"><td>${esc(o.ma)}</td><td>${esc(o.ten)}</td><td>${esc(o.mst)}</td><td class=n>${fmt(o.dauNo)}</td><td class=n>${fmt(o.dauCo)}</td><td class=n>${fmt(o.n)}</td><td class=n>${fmt(o.c)}</td><td class=n>${fmt(o.cuNo)}</td><td class=n>${fmt(o.cuCo)}</td><td class="noprint"><button class="s" style="padding:2px 6px" onclick="event.stopPropagation();startEditPartner('${tab}','${esc(o.ma)}','${esc(o.ten)}','${esc(o.mst)}',${o.dauNo},${o.dauCo})">Sửa</button>${o.inList ? ` <button class="s" style="padding:2px 6px;color:#dc2626" onclick="event.stopPropagation();delPartner('${tab}','${esc(o.ma)}')">Xóa</button>` : ""}</td></tr>`;
+        const selPtMa = tab === "kh" ? selKhMa : selNccMa;
+        const selPtRow = d.rows.find(o => o.ma === selPtMa) || null;
+        const pEditRow = (drf) => `<tr class="ed-row" style="background:var(--warn)" data-edkind="pt">
+          <td><input data-ept="ma" value="${esc(drf.ma)}" placeholder="Mã"></td>
+          <td><input data-ept="ten" value="${esc(drf.ten)}" placeholder="Tên đối tượng"></td>
+          <td><input data-ept="mst" value="${esc(drf.mst)}" placeholder="MST"></td>
+          <td><input type="number" data-ept="dauNo" value="${drf.dauNo}" style="text-align:right"></td>
+          <td><input type="number" data-ept="dauCo" value="${drf.dauCo}" style="text-align:right"></td>
+          <td></td><td></td><td></td><td></td></tr>`;
+        const newPartnerHtml = (editPartner && editPartner.kind === tab && editPartner.origMa === null) ? pEditRow(editPartner.draft) : "";
+        const pg = pagerHtml(tab, d.rows.length);
+        const rows = d.rows.slice(pg.slice[0], pg.slice[1]).map(o => {
+          if (editPartner && editPartner.kind === tab && editPartner.origMa === o.ma) return pEditRow(editPartner.draft);
+          return `<tr class="${selPtMa === o.ma ? "sel" : ""}" data-sel-pt="${esc(o.ma)}" data-ptkind="${tab}" data-ptten="${esc(o.ten)}" data-ptmst="${esc(o.mst)}" data-ptdauno="${o.dauNo}" data-ptdauco="${o.dauCo}" data-ptinlist="${o.inList ? 1 : 0}" style="cursor:pointer" title="Nhấp chọn để Sửa/Xóa ở thanh trên · Nhấp đúp để sửa"><td>${esc(o.ma)}</td><td>${esc(o.ten)}</td><td>${esc(o.mst)}</td><td class=n>${fmt(o.dauNo)}</td><td class=n>${fmt(o.dauCo)}</td><td class=n>${fmt(o.n)}</td><td class=n>${fmt(o.c)}</td><td class=n>${fmt(o.cuNo)}</td><td class=n>${fmt(o.cuCo)}</td></tr>`;
         }).join("");
         const sTh = (k, lbl, isN) => {
           const ind = sortObj.k === k ? (sortObj.d === 1 ? " ▲" : " ▼") : " ⇅";
-          return `<th class="sort ${isN ? "n" : ""}" data-csort="${k}" data-ckind="${tab}" title="Bấm để sắp xếp">${lbl}<span style="opacity:.6;font-size:12px">${ind}</span></th>`;
+          return `<th class="sort ${isN ? "n" : ""}" data-csort="${k}" data-ckind="${tab}" title="Bấm để sắp xếp">${lbl}<span style="opacity:.6;font-size:11px">${ind}</span></th>`;
         };
         const sThR2 = (k, lbl) => {
           const ind = sortObj.k === k ? (sortObj.d === 1 ? " ▲" : " ▼") : " ⇅";
-          return `<th rowspan=2 class="sort" data-csort="${k}" data-ckind="${tab}" title="Bấm để sắp xếp">${lbl}<span style="opacity:.6;font-size:12px">${ind}</span></th>`;
+          return `<th rowspan=2 class="sort" data-csort="${k}" data-ckind="${tab}" title="Bấm để sắp xếp">${lbl}<span style="opacity:.6;font-size:11px">${ind}</span></th>`;
         };
-        const pHead = `<tr>${sThR2("ma", tab === "kh" ? "Mã KH" : "Mã NCC")}${sThR2("ten", tab === "kh" ? "Thông tin khách hàng" : "Thông tin nhà cung cấp")}${sThR2("mst", "MST")}<th colspan=2 style="text-align:center">Số dư đầu kỳ</th><th colspan=2 style="text-align:center">Số phát sinh</th><th colspan=2 style="text-align:center">Số dư cuối kỳ</th><th rowspan=2 class="noprint">Thao tác</th></tr>
+        const pHead = `<tr>${sThR2("ma", tab === "kh" ? "Mã KH" : "Mã NCC")}${sThR2("ten", tab === "kh" ? "Thông tin khách hàng" : "Thông tin nhà cung cấp")}${sThR2("mst", "MST")}<th colspan=2 style="text-align:center">Số dư đầu kỳ</th><th colspan=2 style="text-align:center">Số phát sinh</th><th colspan=2 style="text-align:center">Số dư cuối kỳ</th></tr>
           <tr>${sTh("dauNo", "Nợ", 1)}${sTh("dauCo", "Có", 1)}${sTh("n", "Nợ", 1)}${sTh("c", "Có", 1)}${sTh("cuNo", "Nợ", 1)}${sTh("cuCo", "Có", 1)}</tr>`;
+        const ptCols = `<colgroup><col style="width:9%"><col style="width:25%"><col style="width:9%"><col style="width:9.5%"><col style="width:9.5%"><col style="width:9.5%"><col style="width:9.5%"><col style="width:9.5%"><col style="width:9.5%"></colgroup>`;
+        const ptActBtns = (editPartner && editPartner.kind === tab)
+          ? `<button onclick="savePartner()">💾 Lưu</button><button class="s" onclick="editPartner=null;render()">✕ Hủy</button>`
+          : selPtRow
+            ? `<button onclick="startEditPartner('${tab}','${esc(selPtRow.ma)}','${esc(selPtRow.ten)}','${esc(selPtRow.mst)}',${selPtRow.dauNo},${selPtRow.dauCo})">✎ Sửa (${esc(selPtRow.ma)})</button>${selPtRow.inList ? `<button class="s" style="color:#dc2626" onclick="delPartner('${tab}','${esc(selPtRow.ma)}')">🗑 Xóa</button>` : ""}`
+            : "";
         const netSummary = tab === "kh"
           ? `TK 131x · Nợ - Có: ĐK <b>${fmt(d.T.dauNo - d.T.dauCo)}</b> · CK <b>${fmt(d.T.cuNo - d.T.cuCo)}</b>`
           : `TK 331x · Có - Nợ: ĐK <b>${fmt(d.T.dauCo - d.T.dauNo)}</b> · CK <b>${fmt(d.T.cuCo - d.T.cuNo)}</b>`;
-        h += `<div class="bar">${upl(tab)}<button class="s" onclick="tpl('${tab}')">📄 Tải file mẫu</button><button onclick="addPartner('${tab}')">+ Thêm ${tab === "kh" ? "KH" : "NCC"}</button><button class="s" onclick="expTab('${tab}')">⬇ Xuất Excel</button>
+        h += `<div class="bar">${upl(tab)}<button class="s" onclick="tpl('${tab}')">📄 Tải file mẫu</button><button onclick="addPartner('${tab}')">+ Thêm ${tab === "kh" ? "KH" : "NCC"}</button><span id="topActSlot" style="display:inline-flex;gap:6px;align-items:center">${ptActBtns}</span><button class="s" onclick="expTab('${tab}')">⬇ Xuất Excel</button>
               <input id="${tab}Q" placeholder="Tìm mã / tên / MST..." value="${esc(qVal)}">
               ${perCtrlHtml(tab, per, "Kỳ PS:")}
-              <span class="m">Bấm tiêu đề cột để sắp xếp · ${netSummary}</span></div>
-              <div class="w"><table><thead>${pHead}<tr class="tt"><td colspan=3>TỔNG CỘNG (${d.rows.length})</td><td class=n>${fmt(d.T.dauNo)}</td><td class=n>${fmt(d.T.dauCo)}</td><td class=n>${fmt(d.T.n)}</td><td class=n>${fmt(d.T.c)}</td><td class=n>${fmt(d.T.cuNo)}</td><td class=n>${fmt(d.T.cuCo)}</td><td class="noprint"></td></tr></thead><tbody>${newPartnerHtml}${rows}</tbody></table></div>`;
+              <span class="m">Chọn dòng để Sửa/Xóa · ${netSummary}</span></div>
+              <div class="w"><table>${ptCols}<thead>${pHead}<tr class="tt"><td colspan=3>TỔNG CỘNG (${d.rows.length})</td><td class=n>${fmt(d.T.dauNo)}</td><td class=n>${fmt(d.T.dauCo)}</td><td class=n>${fmt(d.T.n)}</td><td class=n>${fmt(d.T.c)}</td><td class=n>${fmt(d.T.cuNo)}</td><td class=n>${fmt(d.T.cuCo)}</td></tr></thead><tbody>${newPartnerHtml}${rows}</tbody></table></div>
+              ${pg.html}`;
       } else if (tab === "cf") {
         const cfFields = [["ten", "Tên đơn vị"], ["dc", "Địa chỉ"], ["mst", "Mã số thuế"], ["tk", "Tài khoản kho (VD 156)"], ["kho", "Tên kho"], ["ghi", "Người ghi sổ"], ["kt", "Kế toán trưởng"], ["dd", "Người đại diện theo pháp luật"]];
         const cq = cfQ.trim().toLowerCase();
@@ -2135,16 +2528,58 @@
       if ($("#s38Exp")) $("#s38Exp").onclick = () => expS38(C);
       if ($("#scExp")) $("#scExp").onclick = () => expSoCai(C);
       if ($("#cfAll")) $("#cfAll").onclick = expAll;
+      if (directRetEdit && $("#retDirectInp")) {
+        const inp = $("#retDirectInp");
+        if (document.activeElement !== inp) {
+          inp.focus();
+          try { inp.select(); } catch (_) {}
+        }
+      } else if (directNkNoteKey && $("#nkNoteDirectInp")) {
+        const inp = $("#nkNoteDirectInp");
+        if (document.activeElement !== inp) {
+          inp.focus();
+          try { inp.select(); } catch (_) {}
+        }
+      }
+    }
+
+    let _qTimer = null;
+    let _retBlurTimer = null;
+    let _nkNoteBlurTimer = null;
+
+    function updateSelRowCls(attr, val) {
+      document.querySelectorAll("#mn tbody tr").forEach(tr => {
+        tr.classList.toggle("sel", tr.dataset[attr] === val);
+      });
     }
 
     document.addEventListener("click", e => {
+      const pgBtn = e.target.closest("[data-pgk]");
+      if (pgBtn) {
+        tabPage[pgBtn.dataset.pgk] = +pgBtn.dataset.pg || 1;
+        render(); return;
+      }
+      const ndBtn = e.target.closest("[data-nd-tog]");
+      if (ndBtn) {
+        const k = ndBtn.dataset.ndTog;
+        if (k === "ct") ctNdCompact = !ctNdCompact;
+        else if (k === "vp") vpddNdCompact = !vpddNdCompact;
+        else if (k === "nk") nkNdCompact = !nkNdCompact;
+        render(); return;
+      }
       if (e.target.closest("input,select,textarea,a,label")) return;
       const t = e.target.closest("[data-t]");
-      if (t) { tab = t.dataset.t; render(); return; }
+      if (t) {
+        if (pendingRetRecalc) pendingRetRecalc = false;
+        directRetEdit = null;
+        directNkNoteKey = "";
+        tab = t.dataset.t; render(); return;
+      }
       const sk = e.target.closest("th[data-sk]");
       if (sk) {
-        const so = sk.dataset.vp === "1" ? vpddSort : ctSort, k = sk.dataset.sk;
+        const isVp = sk.dataset.vp === "1", so = isVp ? vpddSort : ctSort, k = sk.dataset.sk;
         if (so.k !== k) { so.k = k; so.d = 1; } else if (so.d === 1) { so.d = -1; } else { so.k = ""; so.d = 1; }
+        tabPage[isVp ? "ct_vpdd" : "ct"] = 1;
         render(); return;
       }
       const csort = e.target.closest("th[data-csort]");
@@ -2152,78 +2587,204 @@
         const kind = csort.dataset.ckind, k = csort.dataset.csort;
         const so = kind === "dm" ? dmSort : kind === "kh" ? khSort : nccSort;
         if (so.k !== k) { so.k = k; so.d = 1; } else if (so.d === 1) { so.d = -1; } else { so.k = ""; so.d = 1; }
+        tabPage[kind] = 1;
         render(); return;
       }
-      if (e.target.id === "ctOnlyErr") { ctOnlyErr = !ctOnlyErr; render(); return; }
-      if (e.target.id === "vpOnlyErr") { vpddOnlyErr = !vpddOnlyErr; render(); return; }
-      if (e.target.id === "ctOnlyRet") { ctOnlyRet = !ctOnlyRet; render(); return; }
-      if (e.target.id === "vpOnlyRet") { vpddOnlyRet = !vpddOnlyRet; render(); return; }
-      if (e.target.id === "tkOnlyNeg") { tkOnlyNeg = !tkOnlyNeg; render(); return; }
-      if (e.target.id === "tkVpOnlyNeg") { tkVpOnlyNeg = !tkVpOnlyNeg; render(); return; }
-      if (e.target.closest("button")) return;
-      const ect = e.target.closest("tr[data-edit-ct]");
-      if (ect && (tab === "ct" || tab === "ct_vpdd")) {
-        startEditLine(ect.dataset.editCt, ect.dataset.vp === "1");
+      if (e.target.id === "ctOnlyErr") { ctOnlyErr = !ctOnlyErr; tabPage.ct = 1; render(); return; }
+      if (e.target.id === "vpOnlyErr") { vpddOnlyErr = !vpddOnlyErr; tabPage.ct_vpdd = 1; render(); return; }
+      if (e.target.id === "ctOnlyRet") { ctOnlyRet = !ctOnlyRet; tabPage.ct = 1; render(); return; }
+      if (e.target.id === "vpOnlyRet") { vpddOnlyRet = !vpddOnlyRet; tabPage.ct_vpdd = 1; render(); return; }
+      if (e.target.id === "tkOnlyNeg") { tkOnlyNeg = !tkOnlyNeg; tabPage.tk = 1; render(); return; }
+      if (e.target.id === "tkVpOnlyNeg") { tkVpOnlyNeg = !tkVpOnlyNeg; tabPage.tk_vpdd = 1; render(); return; }
+      if (e.target.closest("button") || e.target.closest("tr.ed-row")) return;
+
+      const sct = e.target.closest("tr[data-sel-ct]");
+      if (sct && (tab === "ct" || tab === "ct_vpdd")) {
+        const isVp = sct.dataset.vp === "1", id = sct.dataset.selCt;
+        if (isVp) selVpddId = id; else selCtId = id;
+        updateSelRowCls("selCt", id);
+        const slot = $("#topActSlot");
+        if (slot && !(editLine && editLine.isVp === isVp)) {
+          slot.innerHTML = sct.dataset.auto === "1"
+            ? ""
+            : `<button onclick="startEditLine('${esc(id)}',${isVp})">✎ Sửa (${esc(sct.dataset.ph || sct.dataset.ma || "dòng")})</button><button class="s" style="color:#dc2626" onclick="delInvLine('${esc(id)}',${isVp})">🗑 Xóa</button>`;
+        }
         return;
       }
-      const edm = e.target.closest("tr[data-edit-dm]");
-      if (edm && tab === "dm") {
-        startEditDm(edm.dataset.editDm);
+      const sdm = e.target.closest("tr[data-sel-dm]");
+      if (sdm && tab === "dm") {
+        const ma = sdm.dataset.selDm;
+        selDmMa = ma;
+        updateSelRowCls("selDm", ma);
+        const slot = $("#topActSlot");
+        if (slot && !editDm) {
+          slot.innerHTML = `<button onclick="startEditDm('${esc(ma)}')">✎ Sửa (${esc(ma)})</button><button class="s" style="color:#dc2626" onclick="delDm('${esc(ma)}')">🗑 Xóa</button>`;
+        }
         return;
       }
-      const enk = e.target.closest("tr[data-edit-nk]");
-      if (enk && tab === "nk") {
-        startEditNk(+enk.dataset.editNk);
+      const snk = e.target.closest("tr[data-sel-nk]");
+      if (snk && tab === "nk") {
+        const key = snk.dataset.selNk, src = snk.dataset.nksrc, idx = +snk.dataset.nkidx, ph = snk.dataset.nkph || "dòng";
+        selNkKey = key;
+        updateSelRowCls("selNk", key);
+        const slot = $("#topActSlot");
+        if (slot && !editNk) {
+          slot.innerHTML = `${src === "imp" ? `<button onclick="startEditNk(${idx})">✎ Sửa (${esc(ph)})</button><button class="s" style="color:#dc2626" onclick="delNk(${idx});selNkKey=''">🗑 Xóa</button>` : `<button class="s" onclick="jumpToKho('${esc(ph)}')">✎ Sửa ở Kho</button>`}<button class="s" onclick="directNkNoteKey='${esc(key)}';render()">Ghi chú</button>`;
+        }
         return;
       }
-      const ept = e.target.closest("tr[data-edit-pt]");
-      if (ept && (tab === "kh" || tab === "ncc")) {
-        startEditPartner(ept.dataset.ptkind, ept.dataset.editPt, ept.dataset.ptten, ept.dataset.ptmst, +ept.dataset.ptdauno, +ept.dataset.ptdauco);
+      const spt = e.target.closest("tr[data-sel-pt]");
+      if (spt && (tab === "kh" || tab === "ncc")) {
+        const ma = spt.dataset.selPt, kind = spt.dataset.ptkind, ten = spt.dataset.ptten || "", mst = spt.dataset.ptmst || "", dNo = +spt.dataset.ptdauno || 0, dCo = +spt.dataset.ptdauco || 0, inList = spt.dataset.ptinlist === "1";
+        if (kind === "kh") selKhMa = ma; else selNccMa = ma;
+        updateSelRowCls("selPt", ma);
+        const slot = $("#topActSlot");
+        if (slot && !(editPartner && editPartner.kind === kind)) {
+          slot.innerHTML = `<button onclick="startEditPartner('${kind}','${esc(ma)}','${esc(ten)}','${esc(mst)}',${dNo},${dCo})">✎ Sửa (${esc(ma)})</button>${inList ? `<button class="s" style="color:#dc2626" onclick="delPartner('${kind}','${esc(ma)}')">🗑 Xóa</button>` : ""}`;
+        }
         return;
       }
       const tkRow = e.target.closest("tr[data-tk]");
-      if (tkRow && tab === "cdsps") { selTk = tkRow.dataset.tk; render(); return; }
+      if (tkRow && tab === "cdsps") {
+        const tk = tkRow.dataset.tk, ten = tkRow.dataset.tkten || "", dNo = +tkRow.dataset.dno || 0, dCo = +tkRow.dataset.dco || 0, hasOpen = tkRow.dataset.hasopen === "1";
+        selTk = tk;
+        updateSelRowCls("tk", tk);
+        const slot = $("#topCdActSlot");
+        if (slot) {
+          const edBtns = editCdsps
+            ? `<button onclick="saveCdspsOpening()">💾 Lưu ĐK</button><button class="s" onclick="editCdsps=null;render()">✕ Hủy</button>`
+            : `<button class="s" onclick="startEditCdsps('${esc(tk)}','${esc(ten)}',${dNo},${dCo})">✎ Sửa ĐK (${esc(tk)})</button>${hasOpen ? `<button class="s" style="color:#dc2626" onclick="delCdspsOpening('${esc(tk)}')">🗑 Xóa ĐK</button>` : ""}`;
+          slot.innerHTML = `<button class="s" onclick="openCdspsPrintModal()">🖨 In sổ (${esc(tk)})</button><button class="s" onclick="openSoCai('${esc(tk)}')">📖 Sổ cái (${esc(tk)})</button><button onclick="openS38('${esc(tk)}')">📒 Sổ chi tiết S38 (${esc(tk)})</button>${edBtns}`;
+        }
+        return;
+      }
       const r = e.target.closest("tr[data-row-ma]");
       if (r && (tab === "tk" || tab === "tk_vpdd")) {
-        if (r.dataset.vp === "1") scVpddMa = r.dataset.rowMa; else scMa = r.dataset.rowMa;
+        const ma = r.dataset.rowMa, isVp = r.dataset.vp === "1", isNeg = r.dataset.neg === "1";
+        if (isVp) scVpddMa = ma; else scMa = ma;
+        updateSelRowCls("rowMa", ma);
+        if ($("#sp")) $("#sp").value = ma;
+        if ($("#topTkPrintSlot")) $("#topTkPrintSlot").innerHTML = `<button onclick="openSc(false,'',${isVp})">📒 In S10-DN (${esc(ma)})</button>`;
+        const slot = $("#topActSlot");
+        if (slot && !(editTk && editTk.isVp === isVp)) {
+          slot.innerHTML = `<button class="s" onclick="startEditTk('${esc(ma)}',${isVp})">✎ Sửa ĐK</button><button class="s" style="color:#dc2626" onclick="delTkOpening('${esc(ma)}',${isVp})">🗑 Xóa ĐK</button>${isNeg ? `<button class="d" onclick="jumpToNegProduct('${esc(ma)}',${isVp})">🔍 KT XNK (${esc(ma)})</button>` : ""}`;
+        }
+      }
+    });
+
+    document.addEventListener("dblclick", e => {
+      if (e.target.closest("button,input,select,textarea,a,label,tr.ed-row")) return;
+      const retCell = e.target.closest("td[data-ret-cell]");
+      if (retCell && (tab === "ct" || tab === "ct_vpdd")) {
+        const id = retCell.dataset.retCell, isVp = retCell.dataset.vp === "1";
+        const arr = isVp ? LnVPDD : Ln;
+        const line = arr.find(x => x.id === id);
+        if (line) {
+          editLine = null;
+          if (isVp) selVpddId = id; else selCtId = id;
+          directRetEdit = { id, isVp, value: line.gi != null ? String(line.gi) : "" };
+          render();
+        }
+        return;
+      }
+      const sct = e.target.closest("tr[data-sel-ct]");
+      if (sct && (tab === "ct" || tab === "ct_vpdd")) {
+        if (sct.dataset.auto === "1") return;
+        const id = sct.dataset.selCt, isVp = sct.dataset.vp === "1";
+        if (sct.dataset.ret === "1") {
+          const arr = isVp ? LnVPDD : Ln;
+          const line = arr.find(x => x.id === id);
+          if (line) {
+            editLine = null;
+            if (isVp) selVpddId = id; else selCtId = id;
+            directRetEdit = { id, isVp, value: line.gi != null ? String(line.gi) : "" };
+            render();
+          }
+        } else {
+          startEditLine(id, isVp);
+        }
+        return;
+      }
+      const noteCell = e.target.closest("td[data-nk-note-cell]");
+      if (noteCell && tab === "nk") {
+        editNk = null;
+        selNkKey = noteCell.dataset.nkNoteCell;
+        directNkNoteKey = noteCell.dataset.nkNoteCell;
         render();
+        return;
+      }
+      const snk = e.target.closest("tr[data-sel-nk]");
+      if (snk && tab === "nk") {
+        if (snk.dataset.nksrc === "imp") startEditNk(+snk.dataset.nkidx);
+        else {
+          editNk = null;
+          selNkKey = snk.dataset.selNk;
+          directNkNoteKey = snk.dataset.selNk;
+          render();
+        }
+        return;
+      }
+      const sdm = e.target.closest("tr[data-sel-dm]");
+      if (sdm && tab === "dm") {
+        selDmMa = sdm.dataset.selDm;
+        startEditDm(sdm.dataset.selDm);
+        return;
+      }
+      const tkRow = e.target.closest("tr[data-tk]");
+      if (tkRow && tab === "cdsps") {
+        selTk = tkRow.dataset.tk;
+        startEditCdsps(tkRow.dataset.tk, tkRow.dataset.tkten || "", +tkRow.dataset.dno || 0, +tkRow.dataset.dco || 0);
+        return;
+      }
+      const r = e.target.closest("tr[data-row-ma]");
+      if (r && (tab === "tk" || tab === "tk_vpdd")) {
+        const isVp = r.dataset.vp === "1";
+        if (isVp) scVpddMa = r.dataset.rowMa; else scMa = r.dataset.rowMa;
+        startEditTk(r.dataset.rowMa, isVp);
+        return;
+      }
+      const spt = e.target.closest("tr[data-sel-pt]");
+      if (spt && (tab === "kh" || tab === "ncc")) {
+        const kind = spt.dataset.ptkind, ma = spt.dataset.selPt;
+        if (kind === "kh") selKhMa = ma; else selNccMa = ma;
+        startEditPartner(kind, ma, spt.dataset.ptten || "", spt.dataset.ptmst || "", +spt.dataset.ptdauno || 0, +spt.dataset.ptdauco || 0);
       }
     });
     document.addEventListener("change", e => {
       const t = e.target;
       if (t.dataset.i && t.files[0]) importFile(t.files[0], t.dataset.i);
-      else if (t.id === "kt") { kt.t = t.value; kt.k = 1; render(); }
-      else if (t.id === "kk") { kt.k = +t.value; render(); }
-      else if (t.id === "ktVp") { ktVpdd.t = t.value; ktVpdd.k = 1; render(); }
-      else if (t.id === "kkVp") { ktVpdd.k = +t.value; render(); }
-      else if (t.id === "vpAll") { vpddShowAll = t.checked; render(); }
-      else if (t.id === "tkNegTop") { tkNegTop = t.checked; render(); }
-      else if (t.id === "tkVpNegTop") { tkVpNegTop = t.checked; render(); }
-      else if (t.id === "ctErrTop") { ctErrTop = t.checked; render(); }
-      else if (t.id === "vpErrTop") { vpddErrTop = t.checked; render(); }
+      else if (t.id === "kt") { kt.t = t.value; kt.k = 1; tabPage.tk = 1; render(); }
+      else if (t.id === "kk") { kt.k = +t.value; tabPage.tk = 1; render(); }
+      else if (t.id === "ktVp") { ktVpdd.t = t.value; ktVpdd.k = 1; tabPage.tk_vpdd = 1; render(); }
+      else if (t.id === "kkVp") { ktVpdd.k = +t.value; tabPage.tk_vpdd = 1; render(); }
+      else if (t.id === "vpAll") { vpddShowAll = t.checked; tabPage.tk_vpdd = 1; render(); }
+      else if (t.id === "tkNegTop") { tkNegTop = t.checked; tabPage.tk = 1; render(); }
+      else if (t.id === "tkVpNegTop") { tkVpNegTop = t.checked; tabPage.tk_vpdd = 1; render(); }
+      else if (t.id === "ctErrTop") { ctErrTop = t.checked; tabPage.ct = 1; render(); }
+      else if (t.id === "vpErrTop") { vpddErrTop = t.checked; tabPage.ct_vpdd = 1; render(); }
       else if (t.id === "sp") { if (t.dataset.vp === "1") scVpddMa = t.value; else scMa = t.value; render(); }
       else if (t.id === "s10t") { s10.t = t.value; s10.k = 1; render(); }
       else if (t.id === "s10k") { s10.k = +t.value; render(); }
       else if (t.id === "s10ma") { if (t.dataset.vp === "1") scVpddMa = t.value; else scMa = t.value; render(); }
       else if (t.id === "s10all") { scAll = t.checked; render(); }
-      else if (t.id === "ctPt") { ctPer.t = t.value; ctPer.k = 1; render(); }
-      else if (t.id === "ctPk") { ctPer.k = +t.value; render(); }
-      else if (t.id === "ctPy") { ctPer.y = +t.value; render(); }
-      else if (t.id === "vpPt") { vpddPer.t = t.value; vpddPer.k = 1; render(); }
-      else if (t.id === "vpPk") { vpddPer.k = +t.value; render(); }
-      else if (t.id === "vpPy") { vpddPer.y = +t.value; render(); }
-      else if (t.id === "nkPt") { nkPer.t = t.value; nkPer.k = 1; render(); }
-      else if (t.id === "nkPk") { nkPer.k = +t.value; render(); }
-      else if (t.id === "nkPy") { nkPer.y = +t.value; render(); }
-      else if (t.id === "dmPt") { dmPer.t = t.value; dmPer.k = 1; render(); }
-      else if (t.id === "dmPk") { dmPer.k = +t.value; render(); }
-      else if (t.id === "dmPy") { dmPer.y = +t.value; render(); }
-      else if (t.id === "khPt") { khPer.t = t.value; khPer.k = 1; render(); }
-      else if (t.id === "khPk") { khPer.k = +t.value; render(); }
-      else if (t.id === "khPy") { khPer.y = +t.value; render(); }
-      else if (t.id === "nccPt") { nccPer.t = t.value; nccPer.k = 1; render(); }
-      else if (t.id === "nccPk") { nccPer.k = +t.value; render(); }
-      else if (t.id === "nccPy") { nccPer.y = +t.value; render(); }
+      else if (t.id === "ctPt") { ctPer.t = t.value; ctPer.k = 1; tabPage.ct = 1; render(); }
+      else if (t.id === "ctPk") { ctPer.k = +t.value; tabPage.ct = 1; render(); }
+      else if (t.id === "ctPy") { ctPer.y = +t.value; tabPage.ct = 1; render(); }
+      else if (t.id === "vpPt") { vpddPer.t = t.value; vpddPer.k = 1; tabPage.ct_vpdd = 1; render(); }
+      else if (t.id === "vpPk") { vpddPer.k = +t.value; tabPage.ct_vpdd = 1; render(); }
+      else if (t.id === "vpPy") { vpddPer.y = +t.value; tabPage.ct_vpdd = 1; render(); }
+      else if (t.id === "nkPt") { nkPer.t = t.value; nkPer.k = 1; tabPage.nk = 1; render(); }
+      else if (t.id === "nkPk") { nkPer.k = +t.value; tabPage.nk = 1; render(); }
+      else if (t.id === "nkPy") { nkPer.y = +t.value; tabPage.nk = 1; render(); }
+      else if (t.id === "dmPt") { dmPer.t = t.value; dmPer.k = 1; tabPage.dm = 1; render(); }
+      else if (t.id === "dmPk") { dmPer.k = +t.value; tabPage.dm = 1; render(); }
+      else if (t.id === "dmPy") { dmPer.y = +t.value; tabPage.dm = 1; render(); }
+      else if (t.id === "khPt") { khPer.t = t.value; khPer.k = 1; tabPage.kh = 1; render(); }
+      else if (t.id === "khPk") { khPer.k = +t.value; tabPage.kh = 1; render(); }
+      else if (t.id === "khPy") { khPer.y = +t.value; tabPage.kh = 1; render(); }
+      else if (t.id === "nccPt") { nccPer.t = t.value; nccPer.k = 1; tabPage.ncc = 1; render(); }
+      else if (t.id === "nccPk") { nccPer.k = +t.value; tabPage.ncc = 1; render(); }
+      else if (t.id === "nccPy") { nccPer.y = +t.value; tabPage.ncc = 1; render(); }
       else if (t.id === "cdCir") { cdspsCir = t.value; render(); }
       else if (t.id === "cdPt") { cdspsPer.t = t.value; cdspsPer.k = 1; render(); }
       else if (t.id === "cdPk") { cdspsPer.k = +t.value; render(); }
@@ -2244,26 +2805,52 @@
       else if (t.id === "yr") {
         const y = +t.value || 2026;
         ctPer.y = vpddPer.y = nkPer.y = dmPer.y = khPer.y = nccPer.y = y;
+        markDirty("all");
         saveLocal(); render();
       }
-      else if (t.id === "up") { saveLocal(); render(); }
+      else if (t.id === "up") { markDirty("all"); saveLocal(); render(); }
     });
     document.addEventListener("input", e => {
       const t = e.target;
       if (["ctQ", "vpQ", "cdQ", "nkQ", "tkQ", "tkVpQ", "dmQ", "khQ", "nccQ", "cfQ"].includes(t.id)) {
-        const v = t.value;
-        if (t.id === "ctQ") ctQ = v;
-        else if (t.id === "vpQ") vpddQ = v;
-        else if (t.id === "cdQ") cdQ = v;
-        else if (t.id === "nkQ") nkQ = v;
-        else if (t.id === "tkQ") tkQ = v;
-        else if (t.id === "tkVpQ") tkVpQ = v;
-        else if (t.id === "dmQ") dmQ = v;
-        else if (t.id === "khQ") khQ = v;
-        else if (t.id === "nccQ") nccQ = v;
-        else if (t.id === "cfQ") cfQ = v;
-        render();
-        const q = $("#" + t.id); if (q) { q.focus(); q.setSelectionRange(v.length, v.length); }
+        const v = t.value, tid = t.id;
+        const posStart = t.selectionStart, posEnd = t.selectionEnd;
+        if (tid === "ctQ") { ctQ = v; tabPage.ct = 1; }
+        else if (tid === "vpQ") { vpddQ = v; tabPage.ct_vpdd = 1; }
+        else if (tid === "cdQ") cdQ = v;
+        else if (tid === "nkQ") { nkQ = v; tabPage.nk = 1; }
+        else if (tid === "tkQ") { tkQ = v; tabPage.tk = 1; }
+        else if (tid === "tkVpQ") { tkVpQ = v; tabPage.tk_vpdd = 1; }
+        else if (tid === "dmQ") { dmQ = v; tabPage.dm = 1; }
+        else if (tid === "khQ") { khQ = v; tabPage.kh = 1; }
+        else if (tid === "nccQ") { nccQ = v; tabPage.ncc = 1; }
+        else if (tid === "cfQ") cfQ = v;
+        if (_qTimer) clearTimeout(_qTimer);
+        _qTimer = setTimeout(() => {
+          render();
+          const q = $("#" + tid);
+          if (q) {
+            q.focus();
+            try { q.setSelectionRange(posStart ?? v.length, posEnd ?? v.length); } catch (_) {}
+          }
+        }, 120);
+      } else if (t.id === "retDirectInp" && directRetEdit) {
+        directRetEdit.value = t.value;
+        const isVp = t.dataset.vp === "1", arr = isVp ? LnVPDD : Ln;
+        const line = arr.find(x => x.id === t.dataset.retDirectId);
+        if (line) {
+          const raw = t.value.trim();
+          const num = raw === "" ? null : Math.round(Number(raw));
+          const validNum = (num !== null && !isNaN(num)) ? num : null;
+          t.classList.toggle("need", validNum == null);
+          t.classList.toggle("ok", validNum != null);
+          const tr = t.closest("tr");
+          if (tr) {
+            const gxCell = tr.querySelector(".ret-gx-cell");
+            if (gxCell) gxCell.textContent = validNum != null ? fmt(Math.round((line.sx || 0) * validNum)) : "";
+          }
+        }
+        pendingRetRecalc = true;
       } else if (t.dataset.ed && editLine) {
         const k = t.dataset.ed;
         if (k === "sn" || k === "sx") editLine.draft[k] = t.value === "" ? null : Number(t.value);
@@ -2291,14 +2878,90 @@
         const k = t.dataset.ept;
         if (k === "dauNo" || k === "dauCo") editPartner.draft[k] = Math.round(Number(t.value) || 0);
         else editPartner.draft[k] = t.value;
-      } else if (t.dataset.nkkey) {
-        if (t.dataset.nksrc === "imp") { const i = +t.dataset.nkidx; if (NKX[i]) NKX[i].gc = t.value; }
-        else nkNotes[t.dataset.nkkey] = t.value;
-        const span = t.nextElementSibling;
-        if (span) span.textContent = t.value;
-        saveLocal();
       } else if (t.dataset.c) {
-        CFG[t.dataset.c] = t.value; saveLocal();
+        CFG[t.dataset.c] = t.value; scheduleSaveLocal();
+      }
+    });
+    document.addEventListener("keydown", e => {
+      const t = e.target;
+      if (t.id === "retDirectInp") {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (_retBlurTimer) { clearTimeout(_retBlurTimer); _retBlurTimer = null; }
+          _skipDirectBlur = true;
+          directRetEdit && (directRetEdit.value = t.value);
+          commitDirectRetEdit(true);
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          if (_retBlurTimer) { clearTimeout(_retBlurTimer); _retBlurTimer = null; }
+          _skipDirectBlur = true;
+          directRetEdit = null;
+          pendingRetRecalc = false;
+          render();
+        }
+        return;
+      }
+      if (t.id === "nkNoteDirectInp") {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (_nkNoteBlurTimer) { clearTimeout(_nkNoteBlurTimer); _nkNoteBlurTimer = null; }
+          _skipDirectBlur = true;
+          commitDirectNkNote(t.dataset.nkkey, t.dataset.nksrc, +t.dataset.nkidx, t.value);
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          if (_nkNoteBlurTimer) { clearTimeout(_nkNoteBlurTimer); _nkNoteBlurTimer = null; }
+          _skipDirectBlur = true;
+          directNkNoteKey = "";
+          render();
+        }
+        return;
+      }
+      const edRow = t.closest && t.closest("tr.ed-row");
+      if (edRow) {
+        const kind = edRow.dataset.edkind;
+        if (e.key === "Enter" && !t.closest("button")) {
+          e.preventDefault();
+          if (kind === "ct") saveEditLine();
+          else if (kind === "dm") saveDm();
+          else if (kind === "tk") saveTk();
+          else if (kind === "nk") saveNk();
+          else if (kind === "cdsps") saveCdspsOpening();
+          else if (kind === "pt") savePartner();
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          if (kind === "ct") editLine = null;
+          else if (kind === "dm") editDm = null;
+          else if (kind === "tk") editTk = null;
+          else if (kind === "nk") editNk = null;
+          else if (kind === "cdsps") editCdsps = null;
+          else if (kind === "pt") editPartner = null;
+          render();
+        }
+      }
+    });
+    document.addEventListener("focusout", e => {
+      const t = e.target;
+      if (t.id === "retDirectInp") {
+        if (_skipDirectBlur) { _skipDirectBlur = false; return; }
+        const val = t.value;
+        if (_retBlurTimer) clearTimeout(_retBlurTimer);
+        _retBlurTimer = setTimeout(() => {
+          _retBlurTimer = null;
+          if (directRetEdit && (!document.activeElement || document.activeElement.id !== "retDirectInp")) {
+            directRetEdit.value = val;
+            commitDirectRetEdit(false);
+          }
+        }, 90);
+      } else if (t.id === "nkNoteDirectInp") {
+        if (_skipDirectBlur) { _skipDirectBlur = false; return; }
+        const key = t.dataset.nkkey, src = t.dataset.nksrc, idx = +t.dataset.nkidx, val = t.value;
+        if (_nkNoteBlurTimer) clearTimeout(_nkNoteBlurTimer);
+        _nkNoteBlurTimer = setTimeout(() => {
+          _nkNoteBlurTimer = null;
+          if (directNkNoteKey === key && (!document.activeElement || document.activeElement.id !== "nkNoteDirectInp")) {
+            commitDirectNkNote(key, src, idx, val);
+          }
+        }, 90);
       }
     });
 
@@ -2325,6 +2988,7 @@
         tkOpening.push(...(d.tkOpening || []));
         Object.assign(nkNotes, d.nkNotes || {});
         NKX.push(...(d.NKX || [])); KH.push(...(d.KH || [])); NCC.push(...(d.NCC || [])); Object.assign(CFG, d.CFG || {});
+        markDirty("all");
         saveLocal(); st("Đã khôi phục dữ liệu từ file JSON."); render();
       } catch (err) { st("File JSON không hợp lệ.", 1); render(); }
     };
@@ -2334,7 +2998,11 @@
         P.length = 0; Ln.length = 0; LnVPDD.length = 0; tkOpening.length = 0; NKX.length = 0; KH.length = 0; NCC.length = 0;
         for (const k in vpddOpening) delete vpddOpening[k];
         for (const k in nkNotes) delete nkNotes[k];
-        scMa = ""; scVpddMa = ""; editLine = null; editDm = null; editTk = null; editNk = null; editCdsps = null; editPartner = null;
+        scMa = ""; scVpddMa = ""; selCtId = ""; selVpddId = ""; selDmMa = ""; selNkKey = ""; selKhMa = ""; selNccMa = "";
+        directRetEdit = null; directNkNoteKey = "";
+        editLine = null; editDm = null; editTk = null; editNk = null; editCdsps = null; editPartner = null;
+        pendingRetRecalc = false;
+        markDirty("all");
         localStorage.removeItem(STORE_KEY); $("#mdl").innerHTML = "";
         st("Đã xóa dữ liệu."); render();
       };
@@ -2359,6 +3027,7 @@
       KH.push({ ma: "KH01", ten: "Công ty ABC", mst: "0301234567", dauNo: 5000000, dauCo: 0, dau: 5000000 });
       NCC.push({ ma: "NCC01", ten: "Công ty Hoàng Long", mst: "0101234567", dauNo: 0, dauCo: 12000000, dau: 12000000 });
       Object.assign(CFG, { ten: "CÔNG TY TNHH MINH ANH", dc: "128 Nguyễn Thị Minh Khai, Q3, TP.HCM", mst: "0314567890" });
+      markDirty("all");
       saveLocal(); st("Đã nạp dữ liệu mẫu (gồm cả đầu kỳ TK cho Bảng CDSPS & kho VPĐD 1368)."); render();
     };
 
